@@ -23,11 +23,6 @@ export function makeAdminHandler({env=process.env,store,notifier=notifyPortal}={
    const rawSearch=String(req.query?.search||'').replace(/[^\p{L}\p{N} @._+-]/gu,'').slice(0,80),search=/^(?:JC-)?\d{4,8}$/i.test(rawSearch)?storageReference(rawSearch.toUpperCase()):rawSearch,page=Math.max(0,Math.min(10000,parseInt(req.query?.page,10)||0));
    const [list,stats]=await Promise.all([db.list({kind,status,search,page}),db.stats()]);return send(200,{...list,entries:list.entries.map(adminEntry),stats,page});
   }
-  if(action==='subscribers'&&req.method==='GET')return send(200,await db.subscribers(Math.max(0,Math.min(10000,parseInt(req.query?.page,10)||0))));
-  if(action==='coupon-status'&&req.method==='POST'){
-   const data=readJson(req);if(typeof data.id!=='string'||!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(data.id)||typeof data.active!=='boolean')return send(400,{error:'Cupón no válido.'});
-   await db.toggleCoupon(data.id,data.active);return send(200,{updated:true});
-  }
   const reference=storageReference(String(req.query?.reference||'').trim().toUpperCase());if(!portalReferencePattern.test(reference))return send(400,{error:'Referencia no válida.'});
   if(action==='detail'&&req.method==='GET'){const entry=await db.find(reference);if(!entry)return send(404,{error:'No encontramos esa solicitud.'});return send(200,{entry:adminEntry(entry),messages:await db.messages(reference)});}
   if(req.method!=='POST'||!['update','reply','note'].includes(action))return send(405,{error:'Acción o método no permitido.'});

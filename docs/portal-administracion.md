@@ -94,15 +94,12 @@ La referencia interna se guarda con ocho dígitos para respetar las restriccione
 
 Hasta que se ejecute el SQL, el backend mantiene la recepción actual con las referencias largas. Después utiliza el contador automáticamente, sin cambios adicionales en Vercel. La página pública muestra el estado por número; la conversación de los códigos cortos requiere confirmar un dato de contacto existente.
 
-## Actualización: centro de ayuda y cupones por correo
+## Centro de ayuda y firma del equipo
 
-1. En Supabase → SQL Editor → New query, ejecuta todo [database/support-promotions.sql](../database/support-promotions.sql). Se puede repetir sin borrar datos ni reiniciar el contador; incluye la numeración JC-0001 si aún no la activaste.
-2. Espera al último despliegue de main en Vercel. Usa las mismas variables actuales, sin añadir secretos.
-3. Abre `/soporte` para crear un ticket. En `/seguimiento`, indica su número y email/teléfono para conversar. El contacto es opcional para consultar solo el estado.
-4. En `/admin`, completa **Tu firma de atención** con nombre y cargo. Las respuestas y actualizaciones públicas guardan esa firma; las notas internas siguen privadas. Marca la opción de correo para notificar al cliente.
-5. En la homepage solicita un cupón con un buzón que controles. La sección `/admin` → **Correos y cupones** muestra su código personal, porcentaje (1–15%), fecha, consentimiento opcional de novedades y estado del envío. Puedes desactivar o reactivar códigos y descargar 50 registros por página en CSV.
-6. Aplica el código en un brief indicando el mismo correo. El servidor vuelve a validar antes de crear el pedido. Si la promoción vigente es mejor, conserva ese precio sin acumular descuentos.
+Si todavía no activaste las firmas de atención, ejecuta todo [database/support-tickets.sql](../database/support-tickets.sql) en Supabase → SQL Editor → New query → Run. Si ejecutaste la actualización anterior de soporte, no hace falta repetirlo. Se puede ejecutar de nuevo sin borrar datos ni reiniciar el contador; incluye la numeración JC-0001.
 
-Los registros repetidos conservan el mismo cupón; el reenvío espera cinco minutos. Un error SMTP no borra ni vuelve a sortear el descuento. Registrar un email solicita únicamente el cupón; no se envían novedades automáticamente, y el permiso para ellas es una casilla independiente. El código público JEYCEE10 y el juego anterior dejan de estar activos. La tabla nueva y sus funciones solo son accesibles con service_role desde el servidor; no se publican correos ni códigos en la API de registro.
+En `/soporte` el cliente abre su ticket. En `/seguimiento`, indica número y email/teléfono para conversar; el contacto es opcional para consultar solo el estado. En `/admin`, completa **Tu firma de atención** con nombre y cargo antes de responder. Las respuestas y actualizaciones públicas conservan esa firma; las notas internas siguen privadas. Marca la casilla de correo para notificar al cliente.
 
-Si ya había un ticket abierto, responde en su conversación en lugar de abrir uno nuevo. Los correos y mensajes de WhatsApp enviados fuera del portal no se incorporan automáticamente al historial. El portal conserva una contraseña compartida del equipo: nombre/cargo son firmas declaradas, no cuentas de empleados con roles individuales.
+Si ya existe un ticket, responde en su conversación para conservar el historial. Los mensajes enviados fuera del portal por email o WhatsApp no se incorporan automáticamente. El acceso sigue usando una contraseña del equipo; las firmas no crean cuentas ni permisos individuales.
+
+La campaña de cupones fue retirada del registro, checkout y administración. Su endpoint devuelve 410 y no envía correos. Los registros antiguos permanecen privados en Supabase si se llegó a activar esa campaña; no se eliminan automáticamente. No hace falta ejecutar SQL nuevo para retirar la campaña ni modificar las variables de Vercel.

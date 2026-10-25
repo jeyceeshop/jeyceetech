@@ -2,8 +2,6 @@ import nodemailer from 'nodemailer';
 import {smtpConfig,smtpConfigIssue} from './contact.js';
 import {issueChallenge,verifyChallenge,claimChallenge} from './antispam.js';
 import {premiumServices,tiersFor} from '../src/premium.js';
-import {personalCouponQuote} from './promotions.js';
-import {makePortalStore} from './portal-store.js';
 import {createOrderNumber} from '../src/order-drafts.js';
 import {briefMessage,whatsappUrl} from '../src/whatsapp.js';
 import {mailboxes} from '../src/email-routing.js';
@@ -29,16 +27,16 @@ export function makeOrdersHandler({env=process.env,transportFactory=nodemailer.c
   if(!product)throw Error('El servicio o plan no existe.');
   for(const key of ['name','brief','email','company','coupon','countryCode','phone'])if(data[key]!==undefined&&typeof data[key]!=='string')throw Error('Revisa los datos del pedido.');
   if(/[\r\n]/.test(data.name||''))throw Error('Revisa tu nombre.');
-  if(data.coupon&&!portal)return send(400,{error:'Los cupones requieren el portal activo. Puedes continuar sin cupón.'});
-  offer=data.coupon?await personalCouponQuote(portalStore||makePortalStore(env),product,data.coupon,data.email):await personalCouponQuote(null,product,'',data.email);briefMessage(product,data,'por asignar',offer);
+  if(data.coupon)throw Error('Los cupones ya no están disponibles. Elimina el código para continuar.');
+  offer={price:product.price,code:''};briefMessage(product,data,'por asignar');
  }catch(error){return send(400,{error:error instanceof SyntaxError?'Solicitud no válida.':error.message});}
  const proof=verifyChallenge(data.antispam,secret);if(!proof||!claimChallenge(proof))return send(400,{error:'La verificación antispam es incorrecta o caducó. Responde la nueva pregunta.'});
  const number=createOrderNumber(),createdAt=new Date().toISOString();
- const message=briefMessage(product,data,number,offer);
+ const message=briefMessage(product,data,number);
  const fields={phone:orderPhone(data),name:data.name.trim(),email:(data.email||'').trim(),company:(data.company||'').trim(),service:product.name,projectRef:number,topic:{title:'Nuevo pedido',email:mailboxes.business},message};
  if(portal){try{
   const saved=await capturePortal({env,req,fields,reference:number,kind:'order',submissionId:data.submissionId,proof,product,offer,content:data.brief.trim(),config,transportFactory,store:portalStore,notifier});
-  const e=saved.entry,publicNumber=displayReference(e.reference),orderMessage=briefMessage(product,data,publicNumber,offer)+(saved.tracking?'\n\nSeguimiento: '+saved.tracking.url:'');
+  const e=saved.entry,publicNumber=displayReference(e.reference),orderMessage=briefMessage(product,data,publicNumber)+(saved.tracking?'\n\nSeguimiento: '+saved.tracking.url:'');
   return send(200,{created:true,portal:true,number:publicNumber,productKey:e.product_key,createdAt:e.created_at,price:e.price,coupon:e.coupon,whatsappUrl:whatsappUrl(orderMessage),tracking:saved.tracking});
  }catch(error){if(error.retryAfter)res.setHeader('Retry-After',String(error.retryAfter));return send(error.status||503,{error:error.status&&error.status!==503?error.message:'No pudimos guardar tu pedido. Tus datos siguen en el formulario; reintenta en un momento.'});}}
  let transport;

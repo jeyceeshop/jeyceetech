@@ -163,44 +163,6 @@ begin
 end $$;
 
 
-create table if not exists public.promotion_subscribers (
- id uuid primary key default gen_random_uuid(),
- email text not null unique check (email=lower(trim(email)) and char_length(email) between 3 and 254),
- code text not null unique check (code ~ '^JC-[A-F0-9]{12}$'),
- percent integer not null check(percent between 1 and 15),
- active boolean not null default true,
- consent_at timestamptz not null default now(),
- consent_version text not null default 'coupon-email-v1',
- marketing_opt_in boolean not null default false,
- mail_status text not null default 'pending' check(mail_status in ('pending','sent','failed')),
- last_attempt_at timestamptz not null default now(),
- created_at timestamptz not null default now()
-);
-alter table public.promotion_subscribers enable row level security;
-revoke all on public.promotion_subscribers from public,anon,authenticated;
-grant all on public.promotion_subscribers to service_role;
-
-create or replace function public.promotion_register(p_email text,p_code text,p_percent integer,p_marketing boolean,p_nonce text) returns jsonb
-language plpgsql security definer set search_path='' as $$
-declare contact public.promotion_subscribers;
-begin
- if char_length(p_email)>254 or p_email<>lower(trim(p_email)) then raise exception 'invalid_email'; end if;
- -- Nonce is claimed persistently, including across different Vercel workers.
- insert into public.portal_rate_limits(key,hits,expires_at) values('promotion-nonce:'||p_nonce,1,now()+interval '15 minutes') on conflict(key) do nothing;
- if not found then return jsonb_build_object('send',false); end if;
- perform pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended('jeycee-coupon:'||p_email,0));
- select * into contact from public.promotion_subscribers where email=p_email for update;
- if found then
-  if not contact.active or contact.last_attempt_at>now()-interval '5 minutes' then return jsonb_build_object('send',false); end if;
-  -- Registration never redraws an existing discount or changes previous marketing consent.
-  update public.promotion_subscribers set last_attempt_at=now() where id=contact.id returning * into contact;
- else
-  insert into public.promotion_subscribers(email,code,percent,marketing_opt_in) values(p_email,p_code,p_percent,coalesce(p_marketing,false)) returning * into contact;
- end if;
- return jsonb_build_object('send',true,'subscriber',to_jsonb(contact));
-end $$;
-revoke all on function public.promotion_register(text,text,integer,boolean,text) from public,anon,authenticated;
-grant execute on function public.promotion_register(text,text,integer,boolean,text) to service_role;
 notify pgrst,'reload schema';
 
 commit;

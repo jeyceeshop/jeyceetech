@@ -18,8 +18,10 @@ test('mail errors never create a successful order; email remains optional',async
  for(const accepted of [false,true]){let message;const handler=makeOrdersHandler({env,transportFactory:()=>({sendMail:async mail=>{message=mail;return {accepted:accepted?['business@jeycee.shop']:[]};},close(){}})});const antispam=await proof(handler),res=response();await handler(request({...body,email:'',antispam}),res);assert.equal(res.code,accepted?200:502);if(!accepted)assert.notEqual(res.data.created,true);else{assert.equal(message.replyTo,undefined);assert.ok(message.html.includes('El cliente no indicó correo'));}}
  const missing=response();await makeOrdersHandler({env:{}})({method:'GET'},missing);assert.equal(missing.code,503);
 });
-test('retired public coupon cannot create a discounted order',async()=>{
- let sent=false;const handler=makeOrdersHandler({env,transportFactory:()=>{sent=true;}}),res=response();
- await handler(request({...body,coupon:'JEYCEE10',price:1,discount:99,antispam:await proof(handler)}),res);
- assert.equal(res.code,400);assert.equal(sent,false);assert.notEqual(res.data.created,true);
+test('retired public and personal coupons cannot create discounted orders',async()=>{
+ for(const coupon of ['JEYCEE10','JC-AABBCCDDEEFF']){
+  let sent=false;const handler=makeOrdersHandler({env,transportFactory:()=>{sent=true;}}),res=response();
+  await handler(request({...body,coupon,price:1,discount:99,antispam:await proof(handler)}),res);
+  assert.equal(res.code,400);assert.equal(sent,false);assert.notEqual(res.data.created,true);
+ }
 });

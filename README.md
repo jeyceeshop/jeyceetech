@@ -155,7 +155,7 @@ Cada tarjeta de plan muestra primero **Preparar un brief**, con enlace a `/check
 
 El brief solicita nombre y objetivo; correo y empresa son opcionales. Se retiraron los campos fiscales y bancarios de ese flujo para no enviarlos a WhatsApp. Si se requieren datos fiscales se coordinan por un canal oficial. El aviso indica no compartir datos confidenciales y que el **único medio de pago es Yappy** (6827-4965), coordinado por el WhatsApp oficial o correos de dominio exacto **@jeycee.shop**. WhatsApp (6091-3544) y Yappy (6827-4965) son números distintos con funciones distintas. El formulario de Contáctanos sigue enviando por SMTP con su diseño HTML y no cambia de destinatarios.
 
-## Pedidos numerados y cupón opcional en el brief
+## Pedidos numerados en el brief
 
 Al solicitar por WhatsApp se muestra **Pedido creado** y un número de solicitud. En el portal con el contador instalado se usa JC-0001, JC-0002…; las referencias largas de versiones anteriores se siguen admitiendo. El mismo número se incluye en el texto de WhatsApp. La interfaz aclara que se creó en el dispositivo y sigue pendiente de enviar/confirmar por la agencia; no acredita recepción, contrato ni pago. Repetir la solicitud sin cambiar el contenido conserva el número durante la sesión. Una nueva combinación de datos/plan genera otro número.
 
@@ -163,7 +163,7 @@ Se guardan como máximo 20 referencias en localStorage, con número, clave del s
 
 Se retiró la casilla de asesoría pagada y el crédito automático de este flujo. La política comercial de asesoría de $20 se mantiene en sus secciones, para confirmar directamente con la agencia.
 
-El cupón público JEYCEE10 fue retirado. Ahora el servidor emite códigos personales con un porcentaje aleatorio de 1% a 15%, guardado una sola vez por dirección de correo. El brief permite aplicar el cupón usando el mismo email que recibió el código. El servidor consulta Supabase y recalcula el precio: no confía en importes ni porcentajes del navegador. Se conserva la mejor promoción sin acumular; Business calcula el importe en la propuesta. El correo del brief sigue siendo opcional si no se usa cupón.
+Se retiró el sistema de cupones. El brief ya no solicita códigos ni registra emails para promociones. El servidor rechaza códigos enviados desde versiones antiguas del formulario. La promoción directa del 10% en Desarrollo web y Diseño gráfico hasta el 30 de noviembre de 2026 se mantiene, calculada desde el catálogo.
 
 ## Pantalla final del pedido
 
@@ -173,7 +173,7 @@ La confirmación conserva únicamente número, clave de producto y query de orig
 
 ## Notificación de pedidos a business@jeycee.shop
 
-La creación de pedidos ahora requiere POST `/api/orders`: valida datos, consentimiento, precio/cupón desde el catálogo del servidor y antispam firmado con contexto separado. GET entrega la pregunta firmada. Usa las mismas variables SMTP que Contáctanos; no requiere configuración nueva. El destinatario está fijo en business@jeycee.shop y no puede reemplazarse mediante campos del navegador. La notificación reutiliza la plantilla HTML, imagen CID y alternativa de texto, con número, servicio, plan, importe y brief; Reply-To se añade solo si el cliente indicó correo.
+La creación de pedidos ahora requiere POST `/api/orders`: valida datos, consentimiento, precio desde el catálogo del servidor y antispam firmado con contexto separado. GET entrega la pregunta firmada. Usa las mismas variables SMTP que Contáctanos; no requiere configuración nueva. El destinatario está fijo en business@jeycee.shop y no puede reemplazarse mediante campos del navegador. La notificación reutiliza la plantilla HTML, imagen CID y alternativa de texto, con número, servicio, plan, importe y brief; Reply-To se añade solo si el cliente indicó correo.
 
 En modo correo, el número se asigna en el servidor y solo se devuelve `created: true` si SMTP acepta business@jeycee.shop. Después la web conserva la confirmación mínima de tres elementos y el enlace a WhatsApp con ese mismo número. Si SMTP falla, se conserva el formulario, se informa del fallo y se renueva la pregunta; no se muestra Pedido creado. El botón se bloquea durante el envío para evitar doble clic. La entrega SMTP no confirma lectura, contratación ni pago. Sin el portal, la notificación queda en el buzón. Con el portal activado, la escritura en Supabase confirma la creación, el correo es una notificación adicional y se entrega también la enlace de seguimiento.
 
@@ -181,17 +181,13 @@ La creación anterior solo local queda obsoleta para pedidos nuevos. Los metadat
 
 El brief requiere código de país (prefijo internacional con +; Panamá +507 por defecto) y teléfono sin repetir ese prefijo. Ambos se validan en navegador y servidor. El número normalizado se incluye en la notificación HTML/texto a business y en el mensaje preparado para WhatsApp; no se almacena en los metadatos locales del pedido.
 
-## Promoción por registro de correo
+## Homepage: proceso, referentes y equipo
 
-La homepage sustituye el juego por un formulario con correo, consentimiento requerido para guardar y enviar el cupón, consentimiento independiente y opcional para futuras novedades, y antispam firmado. POST `/api/promotions` registra la dirección normalizada en `promotion_subscribers`, asigna un código aleatorio `JC-` más 12 caracteres hexadecimales y un porcentaje uniforme generado con `crypto.randomInt(1,16)`. El cupón solo se entrega por correo HTML y texto con logo CID; la API pública nunca devuelve código, porcentaje, dirección ni si existía el registro.
+La página inicial incorpora «Nuestro proceso. Tus resultados», con cuatro etapas: investigamos, diseñamos y desarrollamos, probamos y optimizamos, lanzamos y crecemos. Cada tarjeta presenta las actividades y el resultado esperado; el acompañamiento posterior depende del alcance contratado. El contenido está en `src/home-sections.js` y sus estilos adaptables en `src/home-sections.css`.
 
-Los reintentos conservan código y porcentaje, incluso tras un fallo SMTP. La base serializa registros del mismo correo y rechaza el replay del nonce entre funciones de Vercel. Se admite como máximo un envío cada cinco minutos y tres solicitudes por correo/hora, con límite adicional por IP. La confirmación de envío requiere aceptación SMTP. El consentimiento opcional nunca se marca automáticamente ni se amplía al volver a registrarse. No se envían campañas de novedades automáticamente.
+La sección de referentes muestra logotipos locales de McDonald's, Nike, Apple, Spotify y adidas, identificados expresamente como inspiración de diseño, no como clientes ni socios. Las fuentes de los SVG están documentadas en `public/brands/README.md`. La sección de equipo presenta estrategia, diseño, desarrollo y marketing; sus cifras describen el catálogo y el método actuales, sin inventar años de experiencia, proyectos realizados ni premios.
 
-POST `/api/promotions` con `action: quote` valida la combinación correo/código y calcula la estimación. `/api/orders` comprueba de nuevo esa combinación directamente contra Supabase antes de guardar el pedido. El cupón se aplica al precio regular conservando la mejor promoción, al primer periodo mensual o a la propuesta Business; no cubre asesoría, impuestos ni terceros. Los códigos no tienen vencimiento programado ni se consumen al enviar un brief, pues ese envío no es una compra. El administrador puede desactivarlos.
-
-En `/admin` → **Correos y cupones** aparecen email, código, porcentaje, estado del envío, consentimiento de novedades y fecha de registro. Incluye paginación, CSV de la página (50 registros) y activación/desactivación. La tabla tiene RLS, sin acceso anon/authenticated; solo el backend autenticado del equipo la consulta. Los CSV requieren el mismo cuidado que los datos de clientes. La política de privacidad explica los datos guardados y cómo solicitar su gestión.
-
-**Activación en una base existente:** ejecuta todo [database/support-promotions.sql](database/support-promotions.sql) en Supabase SQL Editor. Incluye firma de agentes, registro de cupones y el contador JC-0001 sin reiniciarlo. Para una base nueva usa `database/portal.sql`. No se necesitan nuevas variables, claves ni servicios; utiliza Supabase y SMTP ya configurados. Despliega el último main en Vercel. El juego y sus archivos se retiraron, junto con el código público JEYCEE10; la promoción comercial del 10% en Desarrollo web y Diseño gráfico hasta noviembre de 2026 sigue vigente.
+El sistema de cupones por registro fue retirado: no hay formulario, campo de checkout, pestaña de administración ni envío de promociones. `/api/promotions` devuelve 410 sin acceder a la base de datos ni enviar correo. Los registros históricos de una instalación que ejecutó el SQL anterior permanecen privados en Supabase, sin borrado automático. Los pedidos anteriores conservan su metadata para no alterar su historial. Las instalaciones nuevas no crean las tablas de la campaña retirada. La base de datos no requiere cambios para retirar la campaña.
 
 ## Centro de ayuda desde la web
 

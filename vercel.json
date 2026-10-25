@@ -18,9 +18,6 @@
     },
     "api/tracking.js": {
       "maxDuration": 30
-    },
-    "api/promotions.js": {
-      "maxDuration": 60
     }
   },
   "headers": [

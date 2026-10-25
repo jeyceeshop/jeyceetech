@@ -1,6 +1,6 @@
 import {initBrief} from './brief.js';
-import {initPromotion} from './promotions.js';
-import './promotions.css';
+import './support.css';
+import './home-sections.css';
 import './portal.css';
 import {quoteWhatsApp,officialWhatsApp} from './whatsapp.js';
 import {installAntiSpam} from './antispam.js';
@@ -48,7 +48,6 @@ document.querySelector('#download-brief').insertAdjacentHTML('afterend','<a clas
 const originalShow=showSummary;function present(text,email=mailboxes.business){originalShow(text);document.querySelector('#send-summary').href=mailLink((email===mailboxes.orders?'[PEDIDOS]':'[COTIZACIÓN]')+' Solicitud — Jey Cee',text,email);document.querySelector('dialog > p').textContent='Descarga el resumen o abre un correo a '+email+'. Nada se envía automáticamente.';}
 const contact=document.querySelector('#contact-form');contact?.addEventListener('submit',e=>{e.preventDefault();const d=new FormData(contact);present(`SOLICITUD PARA JEYCEE TECH\nCotización gratis, sin obligación de compra.\nNo es factura ni comprobante de pago.\n\nNombre: ${d.get('name')}\nCorreo: ${d.get('email')}\nServicio: ${d.get('service')}\n\nProyecto:\n${d.get('message')}`);});
 initBrief();
-initPromotion();
 if(path==='/admin'||path==='/admin/demo')import('./admin.js').then(m=>m.initAdmin({demo:path==='/admin/demo'}));
 if(path==='/seguimiento')import('./tracking.js').then(m=>m.initTracking());
 const reviewForm=document.querySelector('#review-form');if(reviewForm){const key='jeycee-local-reviews-v1';let reviews=[];try{const saved=JSON.parse(localStorage.getItem(key)||'[]');if(Array.isArray(saved))reviews=saved.filter(r=>typeof r.id==='string'&&typeof r.author==='string'&&typeof r.text==='string'&&Number.isInteger(r.rating)&&r.rating>=1&&r.rating<=5).slice(0,50);}catch{}

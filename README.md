@@ -18,24 +18,24 @@ npm run build
 npm run preview -- --port 4173
 ```
 
-Publicar `dist/` en un alojamiento estático. La navegación, menú móvil, 21 páginas de servicios y descarga de brief funcionan sin servicios externos. El formulario genera un resumen local descargable y abre un correo a ventas@jeycee.shop (o hello@jeycee.shop para soporte); el visitante debe confirmar el envío desde su aplicación de correo.
+Publicar `dist/` en un alojamiento estático. La navegación, menú móvil, 21 páginas de servicios y descarga de brief funcionan sin servicios externos. El formulario genera un resumen local descargable y abre un correo a business@jeycee.shop (o hello@jeycee.shop para soporte); el visitante debe confirmar el envío desde su aplicación de correo.
 
 El símbolo SVG es una recreación vectorial de la referencia aportada; reemplazar `public/mark.svg` por el archivo oficial cuando esté disponible. Imagen de portada original generada para este diseño. No se incluyen reseñas, cifras ni clientes inventados. Las fuentes de Google son opcionales y tienen alternativas locales.
 
 ## Catálogo y páginas
 
 - `/servicios`: catálogo; 21 páginas en `/servicios/<slug>` con definición detallada, metodología, resultados esperados, requisitos y cuatro planes con entregables específicos.
-- `/planes`: Básico, Pro, VIP y Business. Básico, Pro y VIP tienen precios por servicio. Business se cotiza mediante Contactar a ventas@jeycee.shop.
+- `/planes`: Básico, Pro, VIP y Business. Básico, Pro y VIP tienen precios por servicio. Business se cotiza mediante Contactar a business@jeycee.shop.
 - `/checkout?plan=productos-digitales--vip`: selección de plan/servicio y preparación de solicitud. El resumen no acredita pago ni es factura fiscal.
 - `/quienes-somos`, `/facturacion`, `/soporte`, `/resenas`, `/preguntas-frecuentes`, `/terminos`, `/privacidad`.
 
-Los datos generales y niveles se editan en `src/catalog.js`; las descripciones ampliadas y los 84 alcances en `src/premium.js`. Los 63 precios y 21 valores Business a cotización se centralizan en `src/pricing.js`. Cada nivel describe su propio alcance, sin sumar automáticamente los niveles anteriores. Los botones Contactar abren un mailto a ventas@jeycee.shop con el servicio y nivel seleccionados; el visitante debe confirmar el envío. Los plazos y el alcance se confirman por proyecto. Se muestra el precio base de cada plan en el servicio, el selector de solicitud y el resumen descargable; Business muestra «A cotización». Impuestos aplicables, extras y costos de terceros se confirman antes de contratar. En el inicio y las tarjetas generales, «Desde» es el mínimo del nivel entre los servicios; no promete el mismo precio para todas las especialidades. Falta razón social y RUC/DV del emisor para completar la información fiscal.
+Los datos generales y niveles se editan en `src/catalog.js`; las descripciones ampliadas y los 84 alcances en `src/premium.js`. Los 63 precios y 21 valores Business a cotización se centralizan en `src/pricing.js`. Cada nivel describe su propio alcance, sin sumar automáticamente los niveles anteriores. Los botones Contactar abren un mailto a business@jeycee.shop con el servicio y nivel seleccionados; el visitante debe confirmar el envío. Los plazos y el alcance se confirman por proyecto. Se muestra el precio base de cada plan en el servicio, el selector de solicitud y el resumen descargable; Business muestra «A cotización». Impuestos aplicables, extras y costos de terceros se confirman antes de contratar. En el inicio y las tarjetas generales, «Desde» es el mínimo del nivel entre los servicios; no promete el mismo precio para todas las especialidades. Falta razón social y RUC/DV del emisor para completar la información fiscal.
 
 La navegación principal contiene Quiénes somos, Servicios (mega menú), Planes premium, Reseñas y el botón Contáctanos. Facturación permanece accesible en el pie de página. El menú se colapsa hasta 1024px y permite cierre con Escape, clic fuera y selección de enlace. La paleta usa naranja melocotón pastel con fondos cálidos y la imagen principal se armoniza mediante un filtro CSS, conservando el archivo original.
 
 ## Contacto y Yappy
 
-Ventas y cotizaciones: `ventas@jeycee.shop`. Soporte y privacidad: `hello@jeycee.shop`. Yappy: `6827-4965`. Los formularios preparan una descarga y un enlace mailto; el usuario debe enviar desde su aplicación de correo. No se crea un ticket ni se recibe un correo automáticamente. El flujo Yappy es manual: confirmar beneficiario, alcance y monto final antes de transferir; la agencia verifica el pago. No hay integración comercial/API de Yappy, lectura bancaria, captura de tarjetas ni emisión fiscal.
+Ventas y cotizaciones: `business@jeycee.shop`. Soporte: `support@jeycee.shop`. Privacidad y contacto general: `hello@jeycee.shop`. Yappy: `6827-4965`. Los formularios preparan una descarga y un enlace mailto; el usuario debe enviar desde su aplicación de correo. No se crea un ticket ni se recibe un correo automáticamente. El flujo Yappy es manual: confirmar beneficiario, alcance y monto final antes de transferir; la agencia verifica el pago. No hay integración comercial/API de Yappy, lectura bancaria, captura de tarjetas ni emisión fiscal.
 
 ## Reseñas compartidas (integración pendiente de credenciales)
 
@@ -77,12 +77,12 @@ El inicio muestra nueve servicios destacados con acceso al catálogo completo. E
 - Todas las cotizaciones son gratuitas y no requieren contratar una asesoría.
 - Asesoramiento opcional: USD 20. Al adquirir un servicio, se acredita íntegramente el pago de la asesoría; no añade costo al servicio. El crédito se usa una vez por asesoría verificada; en servicios mensuales se acredita al primer periodo.
 - El checkout permite solicitar el crédito mediante una casilla. El saldo es estimado, se calcula después del descuento promocional y no es comprobante de pago. La agencia debe verificar el pago de asesoría y registrar su aplicación en la propuesta para evitar usar el crédito más de una vez. Sin base de datos de pagos ni verificación bancaria, la web no afirma haber verificado el abono.
-- La asesoría se solicita por correo a ventas@jeycee.shop; no se inventan duración, agenda ni cita confirmada.
+- La asesoría se solicita por correo a business@jeycee.shop; no se inventan duración, agenda ni cita confirmada.
 - Pruebas: `node --test tests/*.test.js` comprueba el límite temporal en Panamá, precios, centavos y crédito posterior al descuento.
 
 ## Página de contacto
 
-El botón principal del menú dice **Contáctanos** y abre `/contacto`. La página permite preparar consultas de cotización, asesoramiento, soporte, facturación y otros temas. Las solicitudes comerciales se dirigen a ventas@jeycee.shop y las de soporte/facturación/general a hello@jeycee.shop. Admite `?tipo=soporte` o `?tipo=cotizacion&servicio=desarrollo-web` para preseleccionar opciones válidas.
+El botón principal del menú dice **Contáctanos** y abre `/contacto`. La página permite preparar consultas de cotización, asesoramiento, soporte, facturación y otros temas. Cada tema utiliza el destinatario definido en `src/email-routing.js`: comerciales a business, soporte a support, facturación a orders y general a hello. Admite `?tipo=soporte` o `?tipo=cotizacion&servicio=desarrollo-web` para preseleccionar opciones válidas.
 
 `src/contact.js` construye una referencia de borrador por sesión de página, el resumen descargable y el mailto. La referencia no acredita recepción ni crea un ticket en servidor. Solo el usuario puede confirmar el envío desde su aplicación de correo. La web no cambia el estado a recibido o enviado al pulsar el enlace. Puede copiarse o descargarse el resumen si no hay aplicación configurada. Editar el formulario invalida el resumen anterior; la referencia se conserva hasta recargar.
 
@@ -91,3 +91,9 @@ No hay almacenamiento de consultas, seguimiento de estados ni correo automático
 ## Contacto unificado y marca
 
 El menú y el pie de página usan únicamente Contáctanos como acceso a consultas. Soporte se selecciona dentro de `/contacto?tipo=soporte`; facturación utiliza `/contacto?tipo=facturacion`. La antigua ruta `/soporte` redirige al contacto unificado; el servidor de desarrollo también conserva esa compatibilidad. La página y formulario de soporte separados se eliminaron. En el encabezado y pie, la marca muestra solo el símbolo y JEY CEE, sin Tech.
+
+## Distribución de alias de correo
+
+Configuración central: `src/email-routing.js`. Cotización y asesoría → business@jeycee.shop; marketing y campañas → mercadeo@jeycee.shop; pedidos, pagos y facturación (incluido checkout) → orders@jeycee.shop; soporte → support@jeycee.shop; atención VIP y botones de planes VIP → vip@jeycee.shop; colaboraciones → collabs@jeycee.shop; empleo → rrhh@jeycee.shop; gerencia → gerencia@jeycee.shop; general y privacidad → hello@jeycee.shop. Los correos personales angeline y julian quedan fuera de los formularios públicos. Se retiró el alias anterior de ventas de los destinatarios de la web.
+
+La web prepara el destinatario y un asunto con área/referencia. No envía automáticamente ni confirma recepción. Los alias fueron proporcionados por el propietario; no se probó entrega real ni se modificó Namecheap. Si pertenecen al buzón hello, normalmente se recibirán en esa misma bandeja. Las reglas de carpetas o buzones independientes se configuran en el proveedor; la web no los crea.

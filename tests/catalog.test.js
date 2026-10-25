@@ -15,13 +15,13 @@ test('all service tiers have contextual contact links and correct published pric
   assert.ok(s.definition.length>120);assert.ok(s.approach.length>100);assert.ok(s.inputs.length>80);
   for(const p of tiers){
    assert.equal(p.basePrice,pricing[s.slug][p.id]);assert.equal(p.price,offerFor(s.slug,p.id).price);assert.ok(serviceGroups.some(g=>g.id===s.group));assert.equal(p.cadence,s.cadence);assert.ok(p.items.length>=4);
-   const url=new URL(contactUrl(s.name,p.tierName));assert.equal(url.pathname,'ventas@jeycee.shop');assert.ok(url.searchParams.get('subject').includes(s.name));assert.ok(url.searchParams.get('subject').includes(p.tierName));
+   const url=new URL(contactUrl(s.name,p.tierName));assert.equal(url.pathname,p.id==='vip'?'vip@jeycee.shop':'business@jeycee.shop');assert.ok(url.searchParams.get('subject').includes(s.name));assert.ok(url.searchParams.get('subject').includes(p.tierName));
    const summary=orderSummary(p);assert.ok(summary.includes(priceLabel(p.price,p.cadence)));
    if(p.id!=='business'){assert.ok(Number.isFinite(p.price)&&p.price>0);assert.ok(renderPage('/servicios/'+s.slug).html.includes(money(p.price)));}
    else assert.ok(summary.includes('A cotización'));
   }
   assert.ok(tiers[0].price<tiers[1].price&&tiers[1].price<tiers[2].price);
-  const page=renderPage('/servicios/'+s.slug);assert.equal(page.title,s.name);assert.ok(page.html.includes('ventas@jeycee.shop'));
+  const page=renderPage('/servicios/'+s.slug);assert.equal(page.title,s.name);assert.ok(page.html.includes('business@jeycee.shop'));
  }
  for(const id of ['basico','pro','vip'])assert.equal(startingPrice(id),Math.min(...Object.keys(pricing).map(slug=>offerFor(slug,id).price)));
  assert.equal(startingPrice('business'),null);

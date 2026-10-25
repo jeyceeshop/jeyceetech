@@ -1,3 +1,4 @@
+import {mailboxes,salesRecipient} from './email-routing.js';
 import {agencyServices} from './agency-services.js';
 export const services = [
 {slug:'diseno-grafico',name:'Diseño gráfico',short:'Ideas que se convierten en imágenes memorables.',time:'5–7 días hábiles',audience:'Negocios que necesitan piezas profesionales para comunicar promociones, productos o eventos.',description:'Creamos un lenguaje visual que lleva tu mensaje más lejos. Cada pieza combina jerarquía, composición y una dirección de arte alineada con tu marca, tanto en medios digitales como impresos.',items:['Reunión de brief y definición del objetivo','Una dirección creativa','5 piezas gráficas en un formato cada una','2 rondas de ajustes consolidados','Archivos finales JPG, PNG o PDF según el uso'],exclusions:'Impresión, fotografía, compra de imágenes, animación y archivos editables no incluidos.',faq:'¿Puedo pedir formatos adicionales? Sí. Cotizamos las adaptaciones según el tamaño y la cantidad de piezas.'},
@@ -16,11 +17,11 @@ export const plans = [
  {id:'vip',name:'VIP',label:'Una experiencia integral para tu marca.',time:'Calendario según alcance',items:['Estrategia y diseño con mayor profundidad','Sistema ampliado de entregables','Cuatro rondas de ajustes consolidados','Acompañamiento de implementación acordado'],exclusions:'Disponibilidad y acompañamiento se definen en la propuesta; no incluye soporte ilimitado.'},
  {id:'business',name:'Business',label:'A la medida de los retos de tu empresa.',time:'Calendario personalizado',items:['Descubrimiento con las áreas involucradas','Alcance por hitos y necesidades del negocio','Plan de entregas, revisiones y responsables','Capacitación y continuidad por acuerdo'],exclusions:'Integraciones, licencias y compromisos de soporte se acuerdan por escrito.'}
 ];
-export const salesEmail='ventas@jeycee.shop';
+export const salesEmail=mailboxes.business;
 export function contactUrl(service='',tier='') {
- const subject=['Cotización JeyCee Tech',service,tier].filter(Boolean).join(' — ');
+ const subject=[tier.toLowerCase()==='vip'?'[VIP] Cotización Jey Cee':'[COTIZACIÓN] Jey Cee',service,tier].filter(Boolean).join(' — ');
  const body=`Hola, equipo JeyCee Tech.\n\nMe interesa ${service||'conocer sus servicios premium'}${tier?' en el plan '+tier:''}.\n\nMi empresa:\nObjetivo del proyecto:\nFecha deseada:\n\nQuisiera conocer el alcance, calendario e inversión personalizada.`;
- return 'mailto:'+salesEmail+'?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
+ return 'mailto:'+salesRecipient(tier)+'?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
 }
 
 export const serviceGroups=[{id:'design',name:'Diseño y marca',description:'Identidad, comunicación visual y contenido en movimiento.'},{id:'web',name:'Diseño y desarrollo web',description:'Sitios, tiendas, aplicaciones e integraciones.'},{id:'marketing',name:'Marketing y crecimiento',description:'Estrategia, canales, campañas y datos.'}];

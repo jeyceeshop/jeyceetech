@@ -18,8 +18,10 @@ En **Settings → Environment Variables**, configura estas variables para el ent
 | `SUPABASE_SERVICE_ROLE_KEY` | Clave secreta del servidor con rol `service_role`. |
 | `ADMIN_PASSWORD` | Tu contraseña de administración: mínimo 12 caracteres, larga y exclusiva. |
 | `ADMIN_SESSION_SECRET` | Otra clave aleatoria de al menos 32 caracteres. Puedes generarla con `openssl rand -hex 32`. |
-| `PUBLIC_SITE_URL` | `https://jeycee-tech.vercel.app` o el dominio HTTPS oficial que utilices. |
+| `PUBLIC_SITE_URL` | La URL HTTPS de tu web en Vercel → Domains, por ejemplo `https://jeycee-tech.vercel.app`. |
 | `PORTAL_ENABLED` | `true`, **después de ejecutar el SQL**. |
+
+En Vercel usa tipo **Config** para `PUBLIC_SITE_URL` y `PORTAL_ENABLED`; usa **Secret** para las contraseñas y claves.
 
 Conserva `SMTP_USER` y `SMTP_PASS` ya configurados. Las notificaciones y respuestas usan el mismo servicio SMTP. No compartas contraseñas o claves en el chat y no uses prefijos `VITE_`: esas variables nunca deben publicarse en el navegador. Usa valores distintos en entornos de prueba y producción.
 
@@ -77,3 +79,7 @@ No incluyas datos sensibles en notas o respuestas. Mantén una política de cons
 ## Validación realizada
 
 Pruebas automatizadas de autenticación, expiración/revocación, cookies, origen, límites, separación de mensajes públicos y notas internas, estados, errores SMTP, captura idempotente y rutas de correo. Migración y funciones verificadas en PostgreSQL local mediante PGlite, sin credenciales de producción. Los flujos visuales se revisan con navegador local y datos de prueba. La activación y una prueba con tus buzones reales siguen requiriendo la configuración de Vercel y Supabase descrita arriba.
+
+## Si aparece «pendiente de configuración»
+
+Abre `/admin` en el dominio de producción del proyecto donde guardaste las variables (el que aparece en Vercel → Domains, seguido de `/admin`). El mensaje de acceso enumera únicamente las variables faltantes o inválidas, sin mostrar sus valores. Se comprueban `PORTAL_ENABLED=true`, URL HTTPS de Supabase sin rutas adicionales, clave `service_role`, contraseña de 12 a 1024 caracteres y clave interna de sesión de al menos 32 caracteres. Corrige solo las variables indicadas para Production y vuelve a desplegar. Si sigues viendo el texto genérico anterior, espera al despliegue del último commit de main y recarga la página.

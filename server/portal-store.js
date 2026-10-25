@@ -1,12 +1,27 @@
 import {createHmac} from 'node:crypto';
-export const portalEnabled=env=>env.PORTAL_ENABLED==='true';
-export function portalConfigured(env){return portalEnabled(env)&&/^https:\/\/[^/]+\/?$/.test(env.SUPABASE_URL||'')&&!!env.SUPABASE_SERVICE_ROLE_KEY;}
-export function trackingLink(env,reference){let base='https://jeycee-tech.vercel.app';try{const url=new URL(env.PUBLIC_SITE_URL);if(url.protocol==='https:'&&!url.username&&!url.password)base=url.origin;}catch{}return base+'/seguimiento#'+new URLSearchParams({pedido:reference});}
+export const portalEnabled=env=>typeof env.PORTAL_ENABLED==='string'&&env.PORTAL_ENABLED.trim().toLowerCase()==='true';
+function databaseOrigin(env){try{const url=new URL(String(env.SUPABASE_URL||'').trim());return url.protocol==='https:'&&url.pathname==='/'&&!url.username&&!url.password&&!url.search&&!url.hash?url.origin:null;}catch{return null;}}
+export function portalConfigurationIssues(env){
+ const issues=[];
+ if(!portalEnabled(env))issues.push({variable:'PORTAL_ENABLED',code:'NOT_ENABLED',message:'PORTAL_ENABLED: establece el valor true, sin comillas, para activar el portal.'});
+ if(!String(env.SUPABASE_URL||'').trim())issues.push({variable:'SUPABASE_URL',code:'MISSING',message:'SUPABASE_URL: falta la Project URL de Supabase.'});
+ else if(!databaseOrigin(env))issues.push({variable:'SUPABASE_URL',code:'INVALID_URL',message:'SUPABASE_URL: usa la Project URL HTTPS de Supabase, sin rutas de dashboard ni /rest/v1.'});
+ if(typeof env.SUPABASE_SERVICE_ROLE_KEY!=='string'||!env.SUPABASE_SERVICE_ROLE_KEY.trim())issues.push({variable:'SUPABASE_SERVICE_ROLE_KEY',code:'MISSING',message:'SUPABASE_SERVICE_ROLE_KEY: falta la clave service_role de Supabase.'});
+ return issues;
+}
+export function portalConfigured(env){return portalConfigurationIssues(env).length===0;}
+export function trackingLink(env,reference){let base='https://jeycee-tech.vercel.app';for(const value of [env.PUBLIC_SITE_URL?.trim(),env.VERCEL_PROJECT_PRODUCTION_URL?'https://'+env.VERCEL_PROJECT_PRODUCTION_URL.trim():null]){try{const url=new URL(value);if(url.protocol==='https:'&&!url.username&&!url.password){base=url.origin;break;}}catch{}}return base+'/seguimiento#'+new URLSearchParams({pedido:reference});}
 export function makePortalStore(env=process.env,fetcher=fetch){
- const headers={apikey:env.SUPABASE_SERVICE_ROLE_KEY,Authorization:'Bearer '+env.SUPABASE_SERVICE_ROLE_KEY,'Content-Type':'application/json'};
+ const serviceKey=env.SUPABASE_SERVICE_ROLE_KEY.trim();
+ const headers={apikey:serviceKey,Authorization:'Bearer '+serviceKey,'Content-Type':'application/json'};
  async function request(path,{method='GET',body,prefer}={}){
-  const response=await fetcher(env.SUPABASE_URL.replace(/\/$/,'')+'/rest/v1/'+path,{method,headers:{...headers,...(prefer?{Prefer:prefer}:{})},...(body?{body:JSON.stringify(body)}:{}),signal:AbortSignal.timeout(12000)});
-  if(!response.ok){const error=Error('El almacenamiento del portal no está disponible.');error.status=503;try{const detail=await response.json();error.portalSchemaOutdated=(detail.code==='23514'&&String(detail.message).includes('portal_entries_reference_check'))||(detail.code==='23502'&&String(detail.message).includes('tracking_hash'));}catch{}throw error;}
+  const response=await fetcher(databaseOrigin(env)+'/rest/v1/'+path,{method,headers:{...headers,...(prefer?{Prefer:prefer}:{})},...(body?{body:JSON.stringify(body)}:{}),signal:AbortSignal.timeout(12000)});
+  if(!response.ok){
+   const error=Error('El almacenamiento del portal no está disponible.');error.status=503;
+   if([401,403].includes(response.status)){error.portalCode='SUPABASE_ACCESS_REJECTED';error.portalMessage='Supabase rechazó el acceso. Revisa que SUPABASE_SERVICE_ROLE_KEY sea la clave service_role del mismo proyecto que SUPABASE_URL. Guarda en Production y haz Redeploy.';}
+   try{const detail=await response.json();error.portalSchemaOutdated=(detail.code==='23514'&&String(detail.message).includes('portal_entries_reference_check'))||(detail.code==='23502'&&String(detail.message).includes('tracking_hash'));if(['PGRST202','PGRST205','42P01','42883'].includes(detail.code)){error.portalCode='PORTAL_DATABASE_SETUP_REQUIRED';error.portalMessage='Faltan tablas o funciones del portal en este proyecto de Supabase. Ejecuta el archivo completo database/portal.sql en su SQL Editor.';}}catch{}
+   throw error;
+  }
   if(response.status===204)return null;return response.json();
  }
  async function rpc(name,args){return request('rpc/'+name,{method:'POST',body:args});}

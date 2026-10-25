@@ -1,6 +1,14 @@
 import {createHmac,randomUUID,scryptSync,timingSafeEqual} from 'node:crypto';
 const cookieName='jeycee_admin',lifetime=8*60*60;
-export function adminConfigured(env){return typeof env.ADMIN_PASSWORD==='string'&&env.ADMIN_PASSWORD.length>=12&&env.ADMIN_PASSWORD.length<=1024&&typeof env.ADMIN_SESSION_SECRET==='string'&&env.ADMIN_SESSION_SECRET.length>=32;}
+export function adminConfigurationIssues(env){
+ const issues=[];
+ if(typeof env.ADMIN_PASSWORD!=='string'||!env.ADMIN_PASSWORD.trim())issues.push({variable:'ADMIN_PASSWORD',code:'MISSING',message:'ADMIN_PASSWORD: falta la contraseña de acceso.'});
+ else if(env.ADMIN_PASSWORD.length<12||env.ADMIN_PASSWORD.length>1024)issues.push({variable:'ADMIN_PASSWORD',code:'INVALID_LENGTH',message:'ADMIN_PASSWORD: debe tener entre 12 y 1024 caracteres.'});
+ if(typeof env.ADMIN_SESSION_SECRET!=='string'||!env.ADMIN_SESSION_SECRET.trim())issues.push({variable:'ADMIN_SESSION_SECRET',code:'MISSING',message:'ADMIN_SESSION_SECRET: falta la clave interna de sesión.'});
+ else if(env.ADMIN_SESSION_SECRET.length<32)issues.push({variable:'ADMIN_SESSION_SECRET',code:'INVALID_LENGTH',message:'ADMIN_SESSION_SECRET: debe tener al menos 32 caracteres.'});
+ return issues;
+}
+export function adminConfigured(env){return adminConfigurationIssues(env).length===0;}
 const sign=(value,env)=>createHmac('sha256',env.ADMIN_SESSION_SECRET).update('jeycee-admin-v1\0'+env.ADMIN_PASSWORD+'\0'+value).digest('base64url');
 export function passwordMatches(password,env){if(typeof password!=='string'||password.length>1024)return false;const salt='jeycee-admin-password-v1';return timingSafeEqual(scryptSync(password,salt,32),scryptSync(env.ADMIN_PASSWORD,salt,32));}
 export function sessionValue(env,now=Date.now()){const payload=Buffer.from(JSON.stringify({id:randomUUID(),issued:now,expires:now+lifetime*1000})).toString('base64url');return payload+'.'+sign(payload,env);}

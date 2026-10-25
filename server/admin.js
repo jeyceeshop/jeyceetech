@@ -1,12 +1,13 @@
-import {adminConfigured,passwordMatches,sessionValue,isAdmin,sessionCookie,sameOrigin,readJson,privateHeaders} from './admin-auth.js';
-import {makePortalStore,portalConfigured,requestIp,adminEntry,trackingLink} from './portal-store.js';
+import {adminConfigurationIssues,passwordMatches,sessionValue,isAdmin,sessionCookie,sameOrigin,readJson,privateHeaders} from './admin-auth.js';
+import {makePortalStore,portalConfigurationIssues,requestIp,adminEntry,trackingLink} from './portal-store.js';
 import {notifyPortal} from './portal-email.js';
 import {serviceStatuses,portalReferencePattern} from '../src/portal-data.js';
 export function makeAdminHandler({env=process.env,store,notifier=notifyPortal}={}){return async function(req,res){
  privateHeaders(res);const send=(status,body)=>res.status(status).json(body);const action=String(req.query?.action||'session');
  if(!['GET','POST'].includes(req.method)){res.setHeader('Allow','GET, POST');return send(405,{error:'Método no permitido.'});}
  if(req.method==='POST'&&!sameOrigin(req))return send(403,{error:'Origen de solicitud no permitido.'});
- if(!portalConfigured(env)||!adminConfigured(env))return send(503,{error:'El portal de administración está pendiente de configuración. Consulta la guía de activación del proyecto.',configured:false});
+ const issues=[...portalConfigurationIssues(env),...adminConfigurationIssues(env)];
+ if(issues.length)return send(503,{configured:false,code:'PORTAL_CONFIGURATION_REQUIRED',issues,error:'Falta completar la configuración:\n'+issues.map(issue=>'• '+issue.message).join('\n')+'\nCorrige estas variables en Vercel → Production y haz Redeploy.'});
  const db=store||makePortalStore(env);
  try{
   if(action==='session'&&req.method==='GET')return send(isAdmin(req,env)?200:401,{authenticated:isAdmin(req,env)});
@@ -37,9 +38,9 @@ export function makeAdminHandler({env=process.env,store,notifier=notifyPortal}={
   let notification='not_requested';
   if(data.notify===true&&action!=='note'){
    const link=trackingLink(env,reference);
-   const text=message||'Actualizamos el estado de tu solicitud a: '+serviceStatuses.find(s=>s.id===entry.status).label+'. Revisa el historial en https://jeycee-tech.vercel.app/seguimiento con tu número de solicitud.';
+   const text=message||'Actualizamos el estado de tu solicitud a: '+serviceStatuses.find(s=>s.id===entry.status).label+'. Revisa el historial con tu número de solicitud: '+link;
    try{notification=await notifier(entry,text,{env,trackingUrl:link});}catch{notification='failed';}
   }
   return send(200,{entry:adminEntry(entry),notification});
- }catch(error){if(error.retryAfter)res.setHeader('Retry-After',String(error.retryAfter));return send(error.status||503,{error:error.status&&error.status!==503?error.message:'No pudimos completar la operación. Revisa la configuración del portal e inténtalo de nuevo.'});}
+ }catch(error){if(error.retryAfter)res.setHeader('Retry-After',String(error.retryAfter));return send(error.status||503,{...(error.portalCode?{code:error.portalCode}:{}),error:error.portalMessage||(error.status&&error.status!==503?error.message:'No pudimos completar la operación. Revisa la configuración del portal e inténtalo de nuevo.')});}
 };}

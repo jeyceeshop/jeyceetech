@@ -5,3 +5,5 @@
 .portal-thread{max-height:520px;overflow-y:auto;padding-right:5px;overscroll-behavior:contain}.portal-thread:focus-visible{outline:2px solid var(--accent);outline-offset:5px}.admin-inbox{position:sticky;top:20px;max-height:85vh;overflow-y:auto;padding-right:5px}@media(max-width:760px){.admin-inbox{position:static;max-height:530px}.portal-thread{max-height:480px}}
 
 .admin-entry-top>span,.tracking-summary>.eyebrow,.order-created-reference{overflow-wrap:anywhere;word-break:break-word}
+
+#admin-login-status{white-space:pre-line;overflow-wrap:anywhere}

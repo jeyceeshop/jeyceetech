@@ -7,11 +7,43 @@ import {makeOrdersHandler} from '../server/orders.js';
 import {makeContactHandler} from '../server/contact.js';
 import {sessionValue,isAdmin} from '../server/admin-auth.js';
 import {notifyPortal} from '../server/portal-email.js';
+import {makePortalStore,trackingLink} from '../server/portal-store.js';
 const env={PORTAL_ENABLED:'true',SUPABASE_URL:'https://example.supabase.co',SUPABASE_SERVICE_ROLE_KEY:'server-only-test-placeholder',ADMIN_PASSWORD:'test-long-password-only',ADMIN_SESSION_SECRET:'test-session-secret-with-more-than-32-characters',SMTP_USER:'hello@jeycee.shop',SMTP_PASS:'test-smtp-placeholder',VERCEL:'1'};
 const headers={host:'jeycee.test',origin:'https://jeycee.test','content-type':'application/json','x-forwarded-proto':'https'};
 const response=()=>({headers:{},setHeader(k,v){this.headers[k]=v;},status(code){this.code=code;return this;},json(data){this.data=data;return this;}});
 function req(method='GET',query={},body={},auth=false){return {method,query,body,headers:{...headers,...(auth?{cookie:'jeycee_admin='+sessionValue(env)}:{})}};}
 const reference='JC-20261025-A1B2C3D4A1B2C3D4A1B2C3D4';
+test('configuration diagnostics identify the failing variable without exposing values or opening access',async()=>{
+ const cases=[
+  [{PORTAL_ENABLED:undefined},'PORTAL_ENABLED','NOT_ENABLED'],
+  [{PORTAL_ENABLED:'"true"'},'PORTAL_ENABLED','NOT_ENABLED'],
+  [{SUPABASE_URL:undefined},'SUPABASE_URL','MISSING'],
+  [{SUPABASE_URL:'https://private:do-not-echo@example.supabase.co/rest/v1'},'SUPABASE_URL','INVALID_URL'],
+  [{SUPABASE_SERVICE_ROLE_KEY:' \n'},'SUPABASE_SERVICE_ROLE_KEY','MISSING'],
+  [{ADMIN_PASSWORD:undefined},'ADMIN_PASSWORD','MISSING'],
+  [{ADMIN_PASSWORD:'private12'},'ADMIN_PASSWORD','INVALID_LENGTH'],
+  [{ADMIN_SESSION_SECRET:undefined},'ADMIN_SESSION_SECRET','MISSING'],
+  [{ADMIN_SESSION_SECRET:'internal-short-test'},'ADMIN_SESSION_SECRET','INVALID_LENGTH']
+ ];
+ for(const [change,variable,code] of cases){
+  const configured={...env,...change},res=response();await makeAdminHandler({env:configured,store:new Proxy({},{get(){throw Error('Must not access storage');}})})(req(),res);
+  assert.equal(res.code,503);assert.equal(res.data.code,'PORTAL_CONFIGURATION_REQUIRED');assert.deepEqual(res.data.issues.map(i=>[i.variable,i.code]),[[variable,code]]);assert.ok(res.data.error.includes(variable));assert.ok(!res.headers['Set-Cookie']);
+  const raw=JSON.stringify(res.data);for(const secret of [configured.ADMIN_PASSWORD,configured.ADMIN_SESSION_SECRET,configured.SUPABASE_SERVICE_ROLE_KEY,configured.SUPABASE_URL].filter(s=>s&&s.trim().length>5))assert.ok(!raw.includes(secret));
+ }
+ const res=response();await makeAdminHandler({env:{...env,PORTAL_ENABLED:' TRUE \n',SUPABASE_URL:' https://example.supabase.co/ \n'}})(req(),res);assert.equal(res.code,401);assert.equal(res.data.authenticated,false);
+});
+test('Supabase connection tolerates copied outer whitespace without exposing the key',async()=>{
+ let called;const db=makePortalStore({...env,SUPABASE_URL:' https://example.supabase.co/ \n',SUPABASE_SERVICE_ROLE_KEY:' test-key \n'},async(url,options)=>{called={url,options};return new Response(JSON.stringify({orders:0}),{status:200,headers:{'Content-Type':'application/json'}});});
+ assert.deepEqual(await db.stats(),{orders:0});assert.equal(called.url,'https://example.supabase.co/rest/v1/rpc/portal_stats');assert.equal(called.options.headers.apikey,'test-key');assert.equal(called.options.headers.Authorization,'Bearer test-key');
+});
+test('admin reports rejected Supabase credentials and missing SQL without exposing database error details',async()=>{
+ for(const [status,code,expected] of [[401,'PGRST301','SUPABASE_ACCESS_REJECTED'],[404,'PGRST202','PORTAL_DATABASE_SETUP_REQUIRED']]){
+  const db=makePortalStore(env,async()=>new Response(JSON.stringify({code,message:'RAW_DATABASE_DETAIL_PRIVATE',details:'do-not-show'}),{status,headers:{'Content-Type':'application/json'}}));
+  const res=response();await makeAdminHandler({env,store:db})(req('POST',{action:'login'},{password:env.ADMIN_PASSWORD}),res);assert.equal(res.code,503);assert.equal(res.data.code,expected);const raw=JSON.stringify(res.data);for(const secret of ['RAW_DATABASE_DETAIL_PRIVATE','do-not-show',env.SUPABASE_SERVICE_ROLE_KEY,env.ADMIN_PASSWORD])assert.ok(!raw.includes(secret));assert.ok(!res.headers['Set-Cookie']);
+ }
+ assert.ok(trackingLink({VERCEL_PROJECT_PRODUCTION_URL:'agency-example.vercel.app'},reference).startsWith('https://agency-example.vercel.app/seguimiento#'));
+ assert.ok(trackingLink({PUBLIC_SITE_URL:'https://agency.example',VERCEL_PROJECT_PRODUCTION_URL:'agency-example.vercel.app'},reference).startsWith('https://agency.example/seguimiento#'));
+});
 function store(){
  let entry={reference,kind:'order',name:'Nombre privado',email:'private@example.com',phone:'+507 61234567',company:'Privada',service:'Desarrollo web',plan:'Básico',content:'Brief confidencial',recipient:'business@jeycee.shop',tracking_hash:'legacy-column-hidden',submission_key:randomUUID(),submission_fingerprint:'private fingerprint',challenge_nonce:'nonce',status:'received',version:1,created_at:new Date().toISOString()};
  const messages=[{id:'public',author:'staff',visibility:'public',body:'Respuesta pública',created_at:entry.created_at},{id:'private',author:'staff',visibility:'internal',body:'NOTA SECRETA',created_at:entry.created_at}];

@@ -18,18 +18,18 @@ npm run build
 npm run preview -- --port 4173
 ```
 
-Publicar `dist/` en un alojamiento estático. La navegación, menú móvil, ocho páginas de servicios y descarga de brief funcionan sin servicios externos. El formulario genera un resumen local descargable y abre un correo a ventas@jeycee.shop (o hello@jeycee.shop para soporte); el visitante debe confirmar el envío desde su aplicación de correo.
+Publicar `dist/` en un alojamiento estático. La navegación, menú móvil, 21 páginas de servicios y descarga de brief funcionan sin servicios externos. El formulario genera un resumen local descargable y abre un correo a ventas@jeycee.shop (o hello@jeycee.shop para soporte); el visitante debe confirmar el envío desde su aplicación de correo.
 
 El símbolo SVG es una recreación vectorial de la referencia aportada; reemplazar `public/mark.svg` por el archivo oficial cuando esté disponible. Imagen de portada original generada para este diseño. No se incluyen reseñas, cifras ni clientes inventados. Las fuentes de Google son opcionales y tienen alternativas locales.
 
 ## Catálogo y páginas
 
-- `/servicios`: catálogo; ocho páginas en `/servicios/<slug>` con definición detallada, metodología, resultados esperados, requisitos y cuatro planes con entregables específicos.
+- `/servicios`: catálogo; 21 páginas en `/servicios/<slug>` con definición detallada, metodología, resultados esperados, requisitos y cuatro planes con entregables específicos.
 - `/planes`: Básico, Pro, VIP y Business. Básico, Pro y VIP tienen precios por servicio. Business se cotiza mediante Contactar a ventas@jeycee.shop.
 - `/checkout?plan=productos-digitales--vip`: selección de plan/servicio y preparación de solicitud. El resumen no acredita pago ni es factura fiscal.
 - `/quienes-somos`, `/facturacion`, `/soporte`, `/resenas`, `/preguntas-frecuentes`, `/terminos`, `/privacidad`.
 
-Los datos generales y niveles se editan en `src/catalog.js`; las descripciones ampliadas y los 32 alcances en `src/premium.js`. Los 24 precios y ocho valores Business a cotización se centralizan en `src/pricing.js`. Cada nivel describe su propio alcance, sin sumar automáticamente los niveles anteriores. Los botones Contactar abren un mailto a ventas@jeycee.shop con el servicio y nivel seleccionados; el visitante debe confirmar el envío. Los plazos y el alcance se confirman por proyecto. Se muestra el precio base de cada plan en el servicio, el selector de solicitud y el resumen descargable; Business muestra «A cotización». Impuestos aplicables, extras y costos de terceros se confirman antes de contratar. En el inicio y las tarjetas generales, «Desde» es el mínimo del nivel entre los ocho servicios; no promete el mismo precio para todas las especialidades. Falta razón social y RUC/DV del emisor para completar la información fiscal.
+Los datos generales y niveles se editan en `src/catalog.js`; las descripciones ampliadas y los 84 alcances en `src/premium.js`. Los 63 precios y 21 valores Business a cotización se centralizan en `src/pricing.js`. Cada nivel describe su propio alcance, sin sumar automáticamente los niveles anteriores. Los botones Contactar abren un mailto a ventas@jeycee.shop con el servicio y nivel seleccionados; el visitante debe confirmar el envío. Los plazos y el alcance se confirman por proyecto. Se muestra el precio base de cada plan en el servicio, el selector de solicitud y el resumen descargable; Business muestra «A cotización». Impuestos aplicables, extras y costos de terceros se confirman antes de contratar. En el inicio y las tarjetas generales, «Desde» es el mínimo del nivel entre los servicios; no promete el mismo precio para todas las especialidades. Falta razón social y RUC/DV del emisor para completar la información fiscal.
 
 La navegación principal contiene Quiénes somos, Servicios (mega menú), Planes premium, Reseñas y Soporte. Facturación permanece accesible en el pie de página. El menú se colapsa hasta 1024px y permite cierre con Escape, clic fuera y selección de enlace. La paleta usa naranja melocotón pastel con fondos cálidos y la imagen principal se armoniza mediante un filtro CSS, conservando el archivo original.
 
@@ -57,6 +57,14 @@ Vercel detecta Vite: `npm run build`, salida `dist`. `vercel.json` conserva las 
 
 ## Inicio ampliado y mantenimiento de precios
 
-El inicio se construye en `src/home.js`: portada editorial, datos del catálogo, introducción al estudio, orientación por etapa de negocio, catálogo, principios de trabajo, proceso de cuatro etapas, planes, preguntas frecuentes y contacto. Las cifras 8/4/1 describen servicios, niveles y visión; no son datos inventados de clientes o resultados.
+El inicio se construye en `src/home.js`: portada editorial, datos del catálogo, introducción al estudio, orientación por etapa de negocio, catálogo, principios de trabajo, proceso de cuatro etapas, planes, preguntas frecuentes y contacto. Las cifras de especialidades/4/1 describen servicios, niveles y visión; no son datos inventados de clientes o resultados.
 
 Se implementó la opción de precios publicados solicitada. No hay panel administrativo ni credenciales de administrador. Para cambiar tarifas, edita el objeto `pricing` en `src/pricing.js`, conserva `business: null`, valida con `node --test tests/*.test.js` y `npm run build`, y publica el cambio mediante Git. Los precios propuestos corresponden al alcance y no se presentan como investigación de mercado verificada.
+
+## Catálogo de agencia ampliado
+
+21 especialidades en tres familias: diseño y marca, web y desarrollo, y marketing y crecimiento. Las 13 especialidades adicionales, alcances y tarifas se mantienen en `src/agency-services.js`; `src/catalog.js` y `src/pricing.js` las integran sin duplicar datos. Cada especialidad tiene cuatro niveles, para un total de 84 planes (63 tarifas y 21 Business a cotización).
+
+Redes sociales, SEO, publicidad digital y mantenimiento web se cobran por mes (`cadence: 'month'`). Los demás servicios son por proyecto. El periodo se muestra en las tarjetas, tablas, selección y resumen de solicitud. No existen cargos ni renovaciones automáticas. En publicidad, la tarifa es solo gestión: la pauta se paga por separado a la plataforma.
+
+El inicio muestra nueve servicios destacados con acceso al catálogo completo. El mega menú y el catálogo completo agrupan todos los servicios. El formulario de contacto y el selector de planes se generan desde el catálogo para mantenerlos sincronizados.

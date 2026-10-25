@@ -1,0 +1,10 @@
+const menu = document.querySelector('.menu-toggle');
+menu.addEventListener('click', () => { const open = menu.getAttribute('aria-expanded') !== 'true'; menu.setAttribute('aria-expanded', open); document.querySelector('header').classList.toggle('menu-open', open); menu.textContent = open ? '×' : '☰'; });
+document.querySelectorAll('nav a').forEach(a => a.addEventListener('click', () => { menu.setAttribute('aria-expanded', 'false'); document.querySelector('header').classList.remove('menu-open'); menu.textContent = '☰'; }));
+document.querySelectorAll('.service').forEach(el => el.addEventListener('click', () => { const open = el.getAttribute('aria-expanded') === 'true'; el.setAttribute('aria-expanded', !open); }));
+document.querySelector('#year').textContent = new Date().getFullYear();
+const dialog = document.querySelector('dialog'); let summary = '';
+document.querySelector('#contact-form').addEventListener('submit', e => { e.preventDefault(); const data = new FormData(e.target); summary = `PROYECTO PARA JEYCEE TECH\n\nNombre: ${data.get('name')}\nCorreo: ${data.get('email')}\nServicio: ${data.get('service')}\n\nMi idea:\n${data.get('message')}`; document.querySelector('#project-summary').textContent = summary; dialog.showModal(); });
+document.querySelector('.dialog-close').addEventListener('click', () => dialog.close());
+dialog.addEventListener('click', e => { if (e.target === dialog) { const r = dialog.getBoundingClientRect(); if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) dialog.close(); } });
+document.querySelector('#download-brief').addEventListener('click', () => { const url = URL.createObjectURL(new Blob([summary], {type:'text/plain;charset=utf-8'})); const a = document.createElement('a'); a.href = url; a.download = 'mi-proyecto-jeycee-tech.txt'; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); document.querySelector('#form-status').textContent = 'Resumen preparado. Compártelo con nuestro equipo para continuar.'; });

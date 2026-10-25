@@ -1,6 +1,7 @@
 import {buildContactEmail} from './contact-email.js';
 import nodemailer from 'nodemailer';
 import {randomUUID} from 'node:crypto';
+import {createOrderNumber} from '../src/order-drafts.js';
 import {issueChallenge,verifyChallenge,claimChallenge} from './antispam.js';
 import {validateContact} from '../src/contact-data.js';
 import {portalEnabled,portalConfigured} from './portal-store.js';
@@ -27,7 +28,7 @@ export function makeContactHandler({env=process.env,transportFactory=nodemailer.
  if(!req.headers['content-type']?.includes('application/json'))return send(415,{error:'El formato de la solicitud no es válido.'});
  let body,fields;try{body=typeof req.body==='string'?JSON.parse(req.body):req.body;if(!body||body.website)throw Error('La verificación antispam no es válida.');fields=validateContact(body);}catch(error){return send(400,{error:error instanceof SyntaxError?'La solicitud no es válida.':error.message});}
  const proof=verifyChallenge(body.antispam,secret);if(!proof||!claimChallenge(proof))return send(400,{error:'La respuesta antispam es incorrecta o ha caducado. Responde la nueva pregunta e inténtalo de nuevo.'});
- const reference='JC-'+randomUUID().slice(0,8).toUpperCase();
+ const reference=portal?createOrderNumber():'JC-'+randomUUID().slice(0,8).toUpperCase();
  if(portal){try{const saved=await capturePortal({env,req,fields,reference,kind:'ticket',submissionId:body.submissionId,proof,config,transportFactory,store:portalStore,notifier});return send(200,{sent:true,portal:true,reference:saved.entry.reference,tracking:saved.tracking});}catch(error){if(error.retryAfter)res.setHeader('Retry-After',String(error.retryAfter));return send(error.status||503,{error:error.status&&error.status!==503?error.message:'No pudimos registrar tu consulta. Conserva el formulario e inténtalo de nuevo.'});}}
  const emailContent=buildContactEmail(fields,reference);
  let transport;

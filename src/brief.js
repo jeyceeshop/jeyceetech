@@ -1,3 +1,4 @@
+import {orderReferencePattern} from './portal-data.js';
 import {trackingReceipt} from './tracking-receipt.js';
 import {installAntiSpam} from './antispam.js';
 import {products} from './premium.js';
@@ -11,7 +12,7 @@ export function initBrief(){
  const select=form.elements.product,status=document.querySelector('#brief-status'),couponInput=form.elements.coupon,couponStatus=document.querySelector('#coupon-status');
  const main=document.querySelector('main');
  const restored=history.state?.jeyceeOrderConfirmation;
- if(restored&&/^JC-\d{8}-[A-F0-9]{8}$/.test(restored.number||'')&&restored.source===location.search){
+ if(restored&&orderReferencePattern.test(restored.number||'')&&restored.source===location.search){
   const product=products.find(p=>p.key===restored.productKey);
   showOrderConfirmation(main,restored.number,whatsappUrl(`Hola, equipo de Jey Cee. Quiero seguir mi pedido ${restored.number}${product?' de '+product.name:''}. Quisiera confirmar el estado y los siguientes pasos. Esta consulta no confirma una contratación ni un pago.`),{emailed:restored.emailed===true,portal:restored.portal===true});return;
  }
@@ -48,7 +49,7 @@ export function initBrief(){
    const response=await fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...data,submissionId,privacy:form.elements.privacy.checked,antispam:guard.payload()})});
    let order;try{order=await response.json();}catch{throw Error('No pudimos confirmar la creación del pedido. Tus datos siguen en el formulario.');}
    if(!response.ok||order.created!==true)throw Error(order.error||'No pudimos crear el pedido. Intenta más tarde.');
-   if(!/^JC-\d{8}-[A-F0-9]{8}$/.test(order.number))throw Error('No pudimos confirmar el número del pedido. Consulta con la agencia antes de repetirlo.');
+   if(!orderReferencePattern.test(order.number))throw Error('No pudimos confirmar el número del pedido. Consulta con la agencia antes de repetirlo.');
    const target=new URL(order.whatsappUrl);if(target.hostname!=='wa.me'||target.pathname!=='/50760913544')throw Error('No pudimos preparar el seguimiento por WhatsApp.');
    try{saveOrderNumber(order,localStorage);}catch{}
    try{history.replaceState({...history.state,jeyceeOrderConfirmation:{number:order.number,productKey:order.productKey,source:location.search,emailed:order.portal!==true,portal:order.portal===true}},'',location.href);}catch{}

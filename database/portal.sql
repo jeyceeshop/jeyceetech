@@ -1,7 +1,7 @@
 -- Ejecuta todo este archivo en el SQL Editor de Supabase antes de habilitar PORTAL_ENABLED.
 begin;
 create table if not exists public.portal_entries (
- reference text primary key check (reference ~ '^JC-([0-9]{8}-)?[A-F0-9]{8}$'),
+ reference text primary key check (reference ~ '^JC-([0-9]{8}-)?([A-F0-9]{8}|[A-F0-9]{24})$'),
  kind text not null check (kind in ('order','ticket')),
  name text not null, email text not null default '', phone text not null default '', company text not null default '',
  service text not null, product_key text not null default '', plan text not null default '',
@@ -9,7 +9,7 @@ create table if not exists public.portal_entries (
  topic text not null, recipient text not null, project_ref text not null default '',
  status text not null default 'received' check (status in ('received','confirmed','in_progress','waiting_client','in_review','completed','cancelled')),
  assignee text not null default '', due_date date,
- tracking_hash text not null check (tracking_hash ~ '^[a-f0-9]{64}$'),
+ tracking_hash text check (tracking_hash ~ '^[a-f0-9]{64}$'),
  submission_key uuid not null unique, submission_fingerprint text not null, challenge_nonce text not null unique,
  mail_status text not null default 'pending' check (mail_status in ('pending','sent','failed')),
  version integer not null default 1,
@@ -77,9 +77,6 @@ begin
  elsif p_action in ('reply','note') then
   insert into public.portal_messages(entry_reference,author,visibility,body) values(p_reference,'staff',case when p_action='note' then 'internal' else 'public' end,p_payload->>'message');
   update public.portal_entries set version=version+1,updated_at=now() where reference=p_reference returning * into entry;
- elsif p_action='rotate' then
-  update public.portal_entries set tracking_hash=p_payload->>'hash',version=version+1,updated_at=now() where reference=p_reference returning * into entry;
-  insert into public.portal_messages(entry_reference,author,visibility,body) values(p_reference,'system','internal','Clave privada de seguimiento renovada. La clave anterior quedó invalidada.');
  else raise exception 'invalid_action'; end if;
  return to_jsonb(entry);
 end $$;

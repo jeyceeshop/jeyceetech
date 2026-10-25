@@ -1,16 +1,12 @@
-import {createHash,createHmac,randomBytes,timingSafeEqual} from 'node:crypto';
+import {createHmac} from 'node:crypto';
 export const portalEnabled=env=>env.PORTAL_ENABLED==='true';
 export function portalConfigured(env){return portalEnabled(env)&&/^https:\/\/[^/]+\/?$/.test(env.SUPABASE_URL||'')&&!!env.SUPABASE_SERVICE_ROLE_KEY;}
-export function trackingKey(env,reference,submission){return createHmac('sha256',env.SUPABASE_SERVICE_ROLE_KEY).update('jeycee-tracking-v1\0'+reference+'\0'+submission).digest('base64url');}
-export const hashKey=key=>createHash('sha256').update(key).digest('hex');
-export function keyMatches(key,hash){const actual=hashKey(key);return typeof hash==='string'&&hash.length===actual.length&&timingSafeEqual(Buffer.from(hash),Buffer.from(actual));}
-export function trackingLink(env,reference,key){let base='https://jeycee-tech.vercel.app';try{const url=new URL(env.PUBLIC_SITE_URL);if(url.protocol==='https:'&&!url.username&&!url.password)base=url.origin;}catch{}return base+'/seguimiento#'+new URLSearchParams({pedido:reference,clave:key});}
-export function newTrackingKey(){return randomBytes(32).toString('base64url');}
+export function trackingLink(env,reference){let base='https://jeycee-tech.vercel.app';try{const url=new URL(env.PUBLIC_SITE_URL);if(url.protocol==='https:'&&!url.username&&!url.password)base=url.origin;}catch{}return base+'/seguimiento#'+new URLSearchParams({pedido:reference});}
 export function makePortalStore(env=process.env,fetcher=fetch){
  const headers={apikey:env.SUPABASE_SERVICE_ROLE_KEY,Authorization:'Bearer '+env.SUPABASE_SERVICE_ROLE_KEY,'Content-Type':'application/json'};
  async function request(path,{method='GET',body,prefer}={}){
   const response=await fetcher(env.SUPABASE_URL.replace(/\/$/,'')+'/rest/v1/'+path,{method,headers:{...headers,...(prefer?{Prefer:prefer}:{})},...(body?{body:JSON.stringify(body)}:{}),signal:AbortSignal.timeout(12000)});
-  if(!response.ok){const error=Error('El almacenamiento del portal no está disponible.');error.status=503;throw error;}
+  if(!response.ok){const error=Error('El almacenamiento del portal no está disponible.');error.status=503;try{const detail=await response.json();error.portalSchemaOutdated=(detail.code==='23514'&&String(detail.message).includes('portal_entries_reference_check'))||(detail.code==='23502'&&String(detail.message).includes('tracking_hash'));}catch{}throw error;}
   if(response.status===204)return null;return response.json();
  }
  async function rpc(name,args){return request('rpc/'+name,{method:'POST',body:args});}

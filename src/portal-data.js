@@ -8,5 +8,6 @@ export const serviceStatuses=[
  {id:'cancelled',label:'Cancelado',hint:'Consulta el historial o contacta al equipo para más información.'}
 ];
 export const statusFor=id=>serviceStatuses.find(s=>s.id===id)||serviceStatuses[0];
-export const portalReferencePattern=/^JC-(?:\d{8}-)?[A-F0-9]{8}$/;
-export const trackingKeyPattern=/^[A-Za-z0-9_-]{43}$/;
+export const portalReferencePattern=/^JC-(?:\d{8}-)?(?:[A-F0-9]{8}|[A-F0-9]{24})$/;
+export const orderReferencePattern=/^JC-\d{8}-(?:[A-F0-9]{8}|[A-F0-9]{24})$/;
+export const referenceHasConversation=reference=>/^JC-(?:\d{8}-)?[A-F0-9]{24}$/.test(reference);

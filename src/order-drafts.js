@@ -1,7 +1,9 @@
+import {orderReferencePattern} from './portal-data.js';
 const storageKey='jeycee-order-numbers-v1';
 export function createOrderNumber(now=new Date()){
  const parts=Object.fromEntries(new Intl.DateTimeFormat('en-CA',{timeZone:'America/Panama',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(now).map(p=>[p.type,p.value]));
- return `JC-${parts.year}${parts.month}${parts.day}-${crypto.randomUUID().slice(0,8).toUpperCase()}`;
+ const bytes=crypto.getRandomValues(new Uint8Array(12)),suffix=Array.from(bytes,b=>b.toString(16).padStart(2,'0')).join('').toUpperCase();
+ return `JC-${parts.year}${parts.month}${parts.day}-${suffix}`;
 }
 export function saveOrderNumber(order,storage){
  try{
@@ -13,4 +15,4 @@ export function saveOrderNumber(order,storage){
  }catch{return false;}
 }
 
-export function recentOrderNumber(storage){try{const rows=JSON.parse(storage.getItem(storageKey)||'[]');if(!Array.isArray(rows))return null;const row=rows.find(r=>r&&typeof r.number==='string'&&/^JC-\d{8}-[A-F0-9]{8}$/.test(r.number));return row?.number||null;}catch{return null;}}
+export function recentOrderNumber(storage){try{const rows=JSON.parse(storage.getItem(storageKey)||'[]');if(!Array.isArray(rows))return null;const row=rows.find(r=>r&&typeof r.number==='string'&&orderReferencePattern.test(r.number));return row?.number||null;}catch{return null;}}

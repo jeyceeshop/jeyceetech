@@ -17,7 +17,7 @@ test('authorized JEYCEE10 campaign and coupon eligibility, expiry and nonstackin
  assert.equal(couponQuote({...product,price:null},'TEST20',{rules}).pending,true);
 });
 test('local order references preserve numbers and never retain personal form data',()=>{
- const number=createOrderNumber(new Date('2026-11-01T02:00:00Z'));assert.match(number,/^JC-20261031-[A-F0-9]{8}$/);
+ const number=createOrderNumber(new Date('2026-11-01T02:00:00Z'));assert.match(number,/^JC-20261031-[A-F0-9]{24}$/);
  const state=new Map();const storage={getItem:k=>state.get(k)||null,setItem:(k,v)=>state.set(k,v)};
  const order={number,productKey:'sample--pro',createdAt:'2026-11-01T02:00:00Z',price:90,coupon:'',name:'Persona privada',countryCode:'+507',phone:'61234567',email:'private@example.com',brief:'Texto privado'};
  assert.equal(saveOrderNumber(order,storage),true);assert.equal(saveOrderNumber(order,storage),true);assert.equal(recentOrderNumber(storage),number);

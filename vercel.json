@@ -11,5 +11,10 @@
       "destination": "/contacto?tipo=soporte",
       "permanent": true
     }
-  ]
+  ],
+  "functions": {
+    "api/contact.js": {
+      "maxDuration": 60
+    }
+  }
 }

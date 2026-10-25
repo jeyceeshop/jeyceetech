@@ -19,7 +19,7 @@ if(path!=='/'){const page=renderPage(path);main.className='inner-page section';m
  main.innerHTML=renderHome();
 }
 document.querySelector('footer').insertAdjacentHTML('afterbegin',`<div class="footer-directory"><div><span class="eyebrow">HAZ QUE TU MARCA EVOLUCIONE</span><h2>Hablemos de<br/><em>lo que viene.</em></h2><a href="mailto:business@jeycee.shop">business@jeycee.shop ↗</a><p>Panamá · USD · Pagos por Yappy</p></div><div><h3>Explora</h3><a href="/servicios">Servicios</a><a href="/planes">Planes premium</a><a href="/#asesoramiento">Asesoramiento · $20 acreditables</a><a href="/resenas">Reseñas</a><a href="/quienes-somos">Quiénes somos</a><a href="/trabaja-con-nosotros">Trabaja con nosotros</a></div><div><h3>Te acompañamos</h3><a href="/contacto">Contáctanos</a><a href="/facturacion">Facturación</a><a href="/preguntas-frecuentes">Preguntas frecuentes</a><a href="/privacidad">Privacidad</a><a href="/terminos">Condiciones</a></div></div>`);
-document.querySelectorAll('form').forEach(form=>installAntiSpam(form));
+document.querySelectorAll('form:not(#request-form)').forEach(form=>installAntiSpam(form));
 initContact();
 document.querySelector('#year').textContent=new Date().getFullYear();
 const menu=document.querySelector('.menu-toggle');menu.setAttribute('aria-controls','primary-navigation');

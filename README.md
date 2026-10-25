@@ -18,7 +18,7 @@ npm run build
 npm run preview -- --port 4173
 ```
 
-Publicar `dist/` en un alojamiento estático. La navegación, menú móvil, 21 páginas de servicios y descarga de brief funcionan sin servicios externos. El formulario genera un resumen local descargable y abre un correo a business@jeycee.shop (o hello@jeycee.shop para soporte); el visitante debe confirmar el envío desde su aplicación de correo.
+Publicar `dist/` en un alojamiento estático. La navegación, menú móvil, 21 páginas de servicios y descarga de brief funcionan sin servicios externos. Contáctanos envía directamente mediante la función SMTP de Vercel, sujeta a configurar las credenciales. El checkout conserva el resumen descargable y correo manual.
 
 El símbolo SVG es una recreación vectorial de la referencia aportada; reemplazar `public/mark.svg` por el archivo oficial cuando esté disponible. Imagen de portada original generada para este diseño. No se incluyen reseñas, cifras ni clientes inventados. Las fuentes de Google son opcionales y tienen alternativas locales.
 
@@ -35,7 +35,7 @@ La navegación principal contiene Quiénes somos, Servicios (mega menú), Planes
 
 ## Contacto y Yappy
 
-Ventas y cotizaciones: `business@jeycee.shop`. Soporte: `support@jeycee.shop`. Privacidad y contacto general: `hello@jeycee.shop`. Yappy: `6827-4965`. Los formularios preparan una descarga y un enlace mailto; el usuario debe enviar desde su aplicación de correo. No se crea un ticket ni se recibe un correo automáticamente. El flujo Yappy es manual: confirmar beneficiario, alcance y monto final antes de transferir; la agencia verifica el pago. No hay integración comercial/API de Yappy, lectura bancaria, captura de tarjetas ni emisión fiscal.
+Ventas y cotizaciones: `business@jeycee.shop`. Soporte: `support@jeycee.shop`. Privacidad y contacto general: `hello@jeycee.shop`. Yappy: `6827-4965`. Contáctanos utiliza la función SMTP de Vercel cuando está configurada. El checkout y las postulaciones conservan sus enlaces de correo manuales. No se crea una base de datos de tickets. El flujo Yappy es manual: confirmar beneficiario, alcance y monto final antes de transferir; la agencia verifica el pago. No hay integración comercial/API de Yappy, lectura bancaria, captura de tarjetas ni emisión fiscal.
 
 ## Reseñas compartidas (integración pendiente de credenciales)
 
@@ -80,13 +80,26 @@ El inicio muestra nueve servicios destacados con acceso al catálogo completo. E
 - La asesoría se solicita por correo a business@jeycee.shop; no se inventan duración, agenda ni cita confirmada.
 - Pruebas: `node --test tests/*.test.js` comprueba el límite temporal en Panamá, precios, centavos y crédito posterior al descuento.
 
-## Página de contacto
+## Página de contacto y envío directo
 
-El botón principal del menú dice **Contáctanos** y abre `/contacto`. La página permite preparar consultas de cotización, asesoramiento, soporte, facturación y otros temas. Cada tema utiliza el destinatario definido en `src/email-routing.js`: comerciales a business, soporte a support, facturación a orders y general a hello. Admite `?tipo=soporte` o `?tipo=cotizacion&servicio=desarrollo-web` para preseleccionar opciones válidas.
+El botón principal abre `/contacto`. «¿Cómo podemos ayudarte?» es un desplegable con diez áreas; admite `?tipo=soporte&servicio=desarrollo-web` para preselección. Al pulsar Enviar mensaje, se validan campos y antispam y se realiza un POST a `/api/contact`. No se genera un borrador para reenviar ni se abre el correo del cliente.
 
-`src/contact.js` construye una referencia de borrador por sesión de página, el resumen descargable y el mailto. La referencia no acredita recepción ni crea un ticket en servidor. Solo el usuario puede confirmar el envío desde su aplicación de correo. La web no cambia el estado a recibido o enviado al pulsar el enlace. Puede copiarse o descargarse el resumen si no hay aplicación configurada. Editar el formulario invalida el resumen anterior; la referencia se conserva hasta recargar.
+La función de Vercel usa SMTP con Nodemailer y TLS verificado. Asigna una referencia y usa únicamente destinatarios permitidos por el área. El remitente es el buzón autenticado y Reply-To es el cliente. Solo devuelve `sent: true` cuando SMTP acepta el destinatario; un error conserva los datos en pantalla y no muestra éxito. No hay base de datos de tickets, seguimiento de estados ni correo de confirmación adicional al visitante.
 
-No hay almacenamiento de consultas, seguimiento de estados ni correo automático. No se guardan datos personales del contacto en localStorage. Un sistema de tickets real requiere un backend, recepción de correo y autenticación para consultar estados; esa integración no se simula. El checkout se mantiene. Soporte está integrado en Contáctanos.
+### Configuración obligatoria en Vercel
+
+En Settings → Environment Variables del proyecto:
+
+- `SMTP_USER=hello@jeycee.shop` (buzón real de Namecheap, no un alias con contraseña distinta).
+- `SMTP_PASS`: contraseña SMTP/contraseña del buzón, introducida como secreto. No compartir por chat ni subir al repositorio.
+- Opcionales: `SMTP_HOST=mail.privateemail.com`, `SMTP_PORT=465` (valores predeterminados). También se admite 587 con STARTTLS obligatorio.
+- Opcional: `ANTISPAM_SECRET` para una clave de firma independiente. Sin ella, se usa un contexto separado derivado de SMTP_PASS.
+
+Configurar en los entornos de Vercel que correspondan y volver a desplegar. Nunca prefijar secretos con VITE_. La función necesita conectividad a SMTP. El servidor Vite no ejecuta funciones Vercel; para probar integración real se necesita Vercel o su runtime de desarrollo con variables de servidor.
+
+GET `/api/contact` entrega una pregunta firmada, con caducidad de diez minutos. POST valida consentimiento, campos, destinatario, honeypot y firma/respuesta antispam antes de enviar. La protección de reutilización es por instancia de función, no distribuida. La página no expone credenciales ni usa SMTP en el navegador. No registra el cuerpo del mensaje ni guarda CV/datos en una base de tickets. Los mensajes se conservan en el buzón del destinatario para responder y dar seguimiento.
+
+Sin SMTP configurado, el endpoint devuelve 503 y la interfaz explica que el envío no está disponible; nunca finge entregar. Las pruebas automáticas simulan SMTP y verifican fallos, destinatarios, Reply-To, privacidad y antispam. La entrega real no fue validada durante esta sesión porque las credenciales no están disponibles en el entorno.
 
 ## Contacto unificado y marca
 
@@ -96,7 +109,7 @@ El menú y el pie de página usan únicamente Contáctanos como acceso a consult
 
 Configuración central: `src/email-routing.js`. Cotización y asesoría → business@jeycee.shop; marketing y campañas → mercadeo@jeycee.shop; pedidos, pagos y facturación (incluido checkout) → orders@jeycee.shop; soporte → support@jeycee.shop; atención VIP y botones de planes VIP → vip@jeycee.shop; colaboraciones → collabs@jeycee.shop; empleo → rrhh@jeycee.shop; gerencia → gerencia@jeycee.shop; general y privacidad → hello@jeycee.shop. Los correos personales angeline y julian quedan fuera de los formularios públicos. Se retiró el alias anterior de ventas de los destinatarios de la web.
 
-La web prepara el destinatario y un asunto con área/referencia. No envía automáticamente ni confirma recepción. Los alias fueron proporcionados por el propietario; no se probó entrega real ni se modificó Namecheap. Si pertenecen al buzón hello, normalmente se recibirán en esa misma bandeja. Las reglas de carpetas o buzones independientes se configuran en el proveedor; la web no los crea.
+Contáctanos envía por SMTP al destinatario según el área cuando está configurado; el checkout y las postulaciones conservan sus enlaces de correo manuales. La aceptación por SMTP no equivale a confirmación de lectura. Los alias fueron proporcionados por el propietario; no se probó entrega real ni se modificó Namecheap. Si pertenecen al buzón hello, normalmente se recibirán en esa misma bandeja. Las reglas de carpetas o buzones independientes se configuran en el proveedor; la web no los crea.
 
 ## Trabaja con nosotros
 
@@ -116,4 +129,6 @@ Todos los formularios activos de contacto, checkout y reseñas incluyen una preg
 
 En las reseñas públicas, `/api/reviews` entrega además una pregunta firmada por el servidor (HMAC con separación de propósito, usando la credencial de servidor existente, sin exponerla). La función valida respuesta, firma, honeypot y caducidad de diez minutos antes de escribir en Supabase. Los tokens aceptados no pueden reutilizarse en la misma instancia de la función; ese registro es temporal, no una protección distribuida entre todas las instancias. No se requieren secretos adicionales. Se renueva la pregunta tras cada intento enviado al servidor. Sin Supabase configurado, el modo local de reseñas mantiene la validación del navegador.
 
-Esta barrera matemática es básica y no garantiza bloquear bots capaces de resolverla. Los formularios mailto pueden eludirse desde un cliente modificado y no protegen las direcciones de correo frente al spam enviado directamente. Las reseñas siguen sujetas a moderación; para abuso a gran escala se necesita limitar solicitudes en Vercel o implementar protección distribuida. No se ha habilitado correo automático con este cambio.
+Esta barrera matemática es básica y no garantiza bloquear bots capaces de resolverla. Los formularios mailto pueden eludirse desde un cliente modificado y no protegen las direcciones de correo frente al spam enviado directamente. Las reseñas siguen sujetas a moderación; para abuso a gran escala se necesita limitar solicitudes en Vercel o implementar protección distribuida. El envío directo de Contáctanos requiere la configuración SMTP descrita en su sección.
+
+El antispam de Contáctanos también se verifica en servidor. No requiere CAPTCHA de terceros y no añade cookies. Faltas de campos requeridos, correo inválido, mensaje corto y respuesta matemática incorrecta se muestran antes del envío. Las comprobaciones se repiten en el servidor.

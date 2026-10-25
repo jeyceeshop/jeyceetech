@@ -11,10 +11,10 @@ export function installAntiSpam(form,{challenge=null,refresh=null}={}){
  const submit=form.querySelector('[type=submit]');submit.before(box,trap);
  const input=box.querySelector('input'),error=box.querySelector('[role=alert]'),button=box.querySelector('button');
  function paint(){box.querySelector('.antispam-question').textContent=`¿Cuánto es ${current.question}?`;input.setAttribute('aria-label','Respuesta: ¿Cuánto es '+current.question+'?');input.value='';input.setCustomValidity('');error.hidden=true;}
- function fail(message){error.textContent=message;error.hidden=false;input.focus();}
- async function renew(){button.disabled=true;try{current=refresh?await refresh():createMathChallenge();paint();}catch{fail('No pudimos renovar la pregunta. Intenta otra vez.');}finally{button.disabled=false;}}
+ function fail(message){input.setAttribute('aria-invalid','true');error.textContent=message;error.hidden=false;input.focus();}
+ async function renew(){button.disabled=true;try{current=refresh?await refresh():createMathChallenge();paint();return true;}catch{current={...current,token:null};fail('No pudimos renovar la pregunta. Intenta otra vez.');return false;}finally{button.disabled=false;}}
  form.addEventListener('submit',event=>{if(button.disabled){event.preventDefault();event.stopImmediatePropagation();fail('Espera a que cargue la pregunta.');return;}if(trap.querySelector('input').value.trim()||!validMathAnswer(current,input.value)){event.preventDefault();event.stopImmediatePropagation();fail('Revisa la respuesta de la pregunta antispam e inténtalo de nuevo.');return;}error.hidden=true;},true);
- input.addEventListener('input',()=>{error.hidden=true;});button.addEventListener('click',renew);
+ input.addEventListener('input',()=>{error.hidden=true;input.removeAttribute('aria-invalid');});button.addEventListener('click',renew);
  form.addEventListener('reset',()=>{if(!current.token){current=createMathChallenge();paint();}});
  paint();const guard={payload:()=>({token:current.token||null,answer:input.value.trim()}),renew};guards.set(form,guard);return guard;
 }

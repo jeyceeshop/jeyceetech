@@ -1,1 +1,15 @@
-{"rewrites":[{"source":"/((?!api/|assets/|.*\\.[^/]+$).*)","destination":"/index.html"}]}
+{
+  "rewrites": [
+    {
+      "source": "/((?!api/|assets/|.*\\.[^/]+$).*)",
+      "destination": "/index.html"
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/soporte",
+      "destination": "/contacto?tipo=soporte",
+      "permanent": true
+    }
+  ]
+}

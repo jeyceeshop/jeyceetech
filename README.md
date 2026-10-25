@@ -31,7 +31,7 @@ El símbolo SVG es una recreación vectorial de la referencia aportada; reemplaz
 
 Los datos generales y niveles se editan en `src/catalog.js`; las descripciones ampliadas y los 84 alcances en `src/premium.js`. Los 63 precios y 21 valores Business a cotización se centralizan en `src/pricing.js`. Cada nivel describe su propio alcance, sin sumar automáticamente los niveles anteriores. Los botones Contactar abren un mailto a ventas@jeycee.shop con el servicio y nivel seleccionados; el visitante debe confirmar el envío. Los plazos y el alcance se confirman por proyecto. Se muestra el precio base de cada plan en el servicio, el selector de solicitud y el resumen descargable; Business muestra «A cotización». Impuestos aplicables, extras y costos de terceros se confirman antes de contratar. En el inicio y las tarjetas generales, «Desde» es el mínimo del nivel entre los servicios; no promete el mismo precio para todas las especialidades. Falta razón social y RUC/DV del emisor para completar la información fiscal.
 
-La navegación principal contiene Quiénes somos, Servicios (mega menú), Planes premium, Reseñas y Soporte. Facturación permanece accesible en el pie de página. El menú se colapsa hasta 1024px y permite cierre con Escape, clic fuera y selección de enlace. La paleta usa naranja melocotón pastel con fondos cálidos y la imagen principal se armoniza mediante un filtro CSS, conservando el archivo original.
+La navegación principal contiene Quiénes somos, Servicios (mega menú), Planes premium, Reseñas y el botón Contáctanos. Facturación permanece accesible en el pie de página. El menú se colapsa hasta 1024px y permite cierre con Escape, clic fuera y selección de enlace. La paleta usa naranja melocotón pastel con fondos cálidos y la imagen principal se armoniza mediante un filtro CSS, conservando el archivo original.
 
 ## Contacto y Yappy
 
@@ -86,4 +86,8 @@ El botón principal del menú dice **Contáctanos** y abre `/contacto`. La pági
 
 `src/contact.js` construye una referencia de borrador por sesión de página, el resumen descargable y el mailto. La referencia no acredita recepción ni crea un ticket en servidor. Solo el usuario puede confirmar el envío desde su aplicación de correo. La web no cambia el estado a recibido o enviado al pulsar el enlace. Puede copiarse o descargarse el resumen si no hay aplicación configurada. Editar el formulario invalida el resumen anterior; la referencia se conserva hasta recargar.
 
-No hay almacenamiento de consultas, seguimiento de estados ni correo automático. No se guardan datos personales del contacto en localStorage. Un sistema de tickets real requiere un backend, recepción de correo y autenticación para consultar estados; esa integración no se simula. Los formularios existentes de soporte y checkout se mantienen.
+No hay almacenamiento de consultas, seguimiento de estados ni correo automático. No se guardan datos personales del contacto en localStorage. Un sistema de tickets real requiere un backend, recepción de correo y autenticación para consultar estados; esa integración no se simula. El checkout se mantiene. Soporte está integrado en Contáctanos.
+
+## Contacto unificado y marca
+
+El menú y el pie de página usan únicamente Contáctanos como acceso a consultas. Soporte se selecciona dentro de `/contacto?tipo=soporte`; facturación utiliza `/contacto?tipo=facturacion`. La antigua ruta `/soporte` redirige al contacto unificado; el servidor de desarrollo también conserva esa compatibilidad. La página y formulario de soporte separados se eliminaron. En el encabezado y pie, la marca muestra solo el símbolo y JEY CEE, sin Tech.

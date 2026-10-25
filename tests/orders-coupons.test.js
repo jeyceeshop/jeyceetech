@@ -3,8 +3,8 @@ import assert from 'node:assert/strict';
 import {activeCoupons,couponQuote} from '../src/coupons.js';
 import {createOrderNumber,saveOrderNumber,recentOrderNumber} from '../src/order-drafts.js';
 const product={key:'sample--pro',serviceSlug:'sample',id:'pro',basePrice:100,price:90};
-test('authorized JEYCEE10 campaign and coupon eligibility, expiry and nonstacking preserve valid prices',()=>{
- assert.deepEqual(activeCoupons.map(c=>c.code),['JEYCEE10']);assert.equal(couponQuote({...product,price:100},' jeycee10 ').price,90);assert.equal(couponQuote(product,'JEYCEE10').price,90);assert.equal(couponQuote({...product,price:null},'JEYCEE10').pending,true);assert.equal(couponQuote(product).price,90);
+test('public JEYCEE10 is retired; coupon eligibility, expiry and nonstacking preserve valid prices',()=>{
+ assert.deepEqual(activeCoupons,[]);assert.throws(()=>couponQuote(product,'JEYCEE10'),/no está disponible/);assert.equal(couponQuote(product).price,90);
  assert.throws(()=>couponQuote(product,'NOEXISTE'),/no está disponible/);
  const rules=[{code:'TEST20',type:'percent',value:20,active:true,serviceSlugs:['sample'],tiers:['pro']}];
  const result=couponQuote(product,' test20 ',{rules});assert.equal(result.price,80);assert.equal(result.discount,10);assert.equal(result.code,'TEST20');

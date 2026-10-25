@@ -11,7 +11,7 @@ export async function demoRequest(action,params={},data={}){
  const e=rows.find(e=>e.reference===params.reference);if(!e)throw Error('Solicitud de ejemplo no encontrada.');
  if(action==='detail')return {entry:structuredClone(e),messages:structuredClone(threads.get(e.reference))};
  if(data.version!==e.version)throw Error('Recarga la solicitud de ejemplo.');
- if(action==='update'){e.status=data.status;e.assignee=data.assignee;e.due_date=data.dueDate||null;threads.get(e.reference).push({id:crypto.randomUUID(),author:'system',visibility:'public',body:data.message||'Estado actualizado en la demostración.',status:e.status,created_at:new Date().toISOString()});}
- if(['reply','note'].includes(action))threads.get(e.reference).push({id:crypto.randomUUID(),author:'staff',visibility:action==='note'?'internal':'public',body:data.message,created_at:new Date().toISOString()});
+ if(action==='update'){e.status=data.status;e.assignee=data.assignee;e.due_date=data.dueDate||null;threads.get(e.reference).push({id:crypto.randomUUID(),author:'staff',staff_name:data.staffName,staff_role:data.staffRole,visibility:'public',body:data.message||'Estado actualizado en la demostración.',status:e.status,created_at:new Date().toISOString()});}
+ if(['reply','note'].includes(action))threads.get(e.reference).push({id:crypto.randomUUID(),author:'staff',staff_name:data.staffName,staff_role:data.staffRole,visibility:action==='note'?'internal':'public',body:data.message,created_at:new Date().toISOString()});
  e.version++;e.updated_at=new Date().toISOString();return {entry:structuredClone(e),notification:'not_requested'};
 }

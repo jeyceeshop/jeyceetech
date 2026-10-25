@@ -163,7 +163,7 @@ Se guardan como máximo 20 referencias en localStorage, con número, clave del s
 
 Se retiró la casilla de asesoría pagada y el crédito automático de este flujo. La política comercial de asesoría de $20 se mantiene en sus secciones, para confirmar directamente con la agencia.
 
-La campaña autorizada **JEYCEE10** activa un 10% sobre el precio regular del servicio desde `src/coupons.js`. El campo y botón del brief están habilitados. Se admiten descuentos de porcentaje o importe, vigencia y alcance por servicio/nivel. Por defecto no se acumulan con una promoción: se conserva el mejor precio; solo una regla con stackWithPromotion permite aplicarlo sobre la promoción. Business incluye la referencia para revisar su importe en propuesta. Los descuentos son estimaciones del navegador y requieren confirmación de la agencia, no validación de pago ni garantía de uso único.
+El cupón público JEYCEE10 fue retirado. Ahora el servidor emite códigos personales con un porcentaje aleatorio de 1% a 15%, guardado una sola vez por dirección de correo. El brief permite aplicar el cupón usando el mismo email que recibió el código. El servidor consulta Supabase y recalcula el precio: no confía en importes ni porcentajes del navegador. Se conserva la mejor promoción sin acumular; Business calcula el importe en la propuesta. El correo del brief sigue siendo opcional si no se usa cupón.
 
 ## Pantalla final del pedido
 
@@ -181,11 +181,25 @@ La creación anterior solo local queda obsoleta para pedidos nuevos. Los metadat
 
 El brief requiere código de país (prefijo internacional con +; Panamá +507 por defecto) y teléfono sin repetir ese prefijo. Ambos se validan en navegador y servidor. El número normalizado se incluye en la notificación HTML/texto a business y en el mensaje preparado para WhatsApp; no se almacena en los metadatos locales del pedido.
 
-## Campaña interactiva «Conecta tu marca»
+## Promoción por registro de correo
 
-La homepage incorpora un Brand Lab: al tocar Estrategia, Diseño y Tecnología, las tres piezas del símbolo de Jey Cee se ensamblan y revelan JEYCEE10. Botones nativos con estado, progreso y avisos accesibles; admite teclado y movimiento reducido. El cupón se puede copiar (con selección manual si falla el portapapeles) o aplicar desde el enlace al checkout. Se conserva solo el código en sessionStorage de la pestaña: no hay registro, cookies ni datos personales. Si el almacenamiento está bloqueado, el enlace con `?cupon=JEYCEE10` sigue funcionando.
+La homepage sustituye el juego por un formulario con correo, consentimiento requerido para guardar y enviar el cupón, consentimiento independiente y opcional para futuras novedades, y antispam firmado. POST `/api/promotions` registra la dirección normalizada en `promotion_subscribers`, asigna un código aleatorio `JC-` más 12 caracteres hexadecimales y un porcentaje uniforme generado con `crypto.randomInt(1,16)`. El cupón solo se entrega por correo HTML y texto con logo CID; la API pública nunca devuelve código, porcentaje, dirección ni si existía el registro.
 
-Código público, reutilizable y sin fecha de caducidad configurada; no hay sorteo ni comprobación de uso único. Aplica 10% al precio regular, conservando la mejor promoción sin acumular descuentos. En planes mensuales aplica al primer periodo; en Business se incluye para calcular en propuesta. Excluye asesoría, impuestos y terceros. El servidor valida el código y recalcula el precio antes de remitir el pedido a business@jeycee.shop; el correo y WhatsApp conservan la referencia y el importe.
+Los reintentos conservan código y porcentaje, incluso tras un fallo SMTP. La base serializa registros del mismo correo y rechaza el replay del nonce entre funciones de Vercel. Se admite como máximo un envío cada cinco minutos y tres solicitudes por correo/hora, con límite adicional por IP. La confirmación de envío requiere aceptación SMTP. El consentimiento opcional nunca se marca automáticamente ni se amplía al volver a registrarse. No se envían campañas de novedades automáticamente.
+
+POST `/api/promotions` con `action: quote` valida la combinación correo/código y calcula la estimación. `/api/orders` comprueba de nuevo esa combinación directamente contra Supabase antes de guardar el pedido. El cupón se aplica al precio regular conservando la mejor promoción, al primer periodo mensual o a la propuesta Business; no cubre asesoría, impuestos ni terceros. Los códigos no tienen vencimiento programado ni se consumen al enviar un brief, pues ese envío no es una compra. El administrador puede desactivarlos.
+
+En `/admin` → **Correos y cupones** aparecen email, código, porcentaje, estado del envío, consentimiento de novedades y fecha de registro. Incluye paginación, CSV de la página (50 registros) y activación/desactivación. La tabla tiene RLS, sin acceso anon/authenticated; solo el backend autenticado del equipo la consulta. Los CSV requieren el mismo cuidado que los datos de clientes. La política de privacidad explica los datos guardados y cómo solicitar su gestión.
+
+**Activación en una base existente:** ejecuta todo [database/support-promotions.sql](database/support-promotions.sql) en Supabase SQL Editor. Incluye firma de agentes, registro de cupones y el contador JC-0001 sin reiniciarlo. Para una base nueva usa `database/portal.sql`. No se necesitan nuevas variables, claves ni servicios; utiliza Supabase y SMTP ya configurados. Despliega el último main en Vercel. El juego y sus archivos se retiraron, junto con el código público JEYCEE10; la promoción comercial del 10% en Desarrollo web y Diseño gráfico hasta noviembre de 2026 sigue vigente.
+
+## Centro de ayuda desde la web
+
+`/soporte` permite abrir un ticket con nombre, email, código de país, teléfono, motivo y mensaje; opcionalmente se vincula un pedido. Los datos se validan en el servidor, junto con consentimiento y antispam. Reutiliza los destinatarios existentes: support@ para soporte, orders@ para pagos/facturación y hello@ para consultas generales. Al crearse muestra el número y un enlace a Seguimiento, y oculta el formulario para evitar otra solicitud accidental.
+
+`/seguimiento` permite introducir número y contacto en una sola consulta para abrir la conversación; el contacto es opcional para ver solo el estado. Confirma el email o teléfono original, sin contraseña ni clave adicional. Las respuestas se guardan en Supabase y aparecen en el historial de administración. El equipo responde desde `/admin`, con **nombre y cargo obligatorios** para respuestas y actualizaciones públicas. Cada mensaje conserva su propia firma aunque otra persona continúe después. Las notas internas siguen privadas. Las notificaciones HTML incluyen la firma y el enlace de seguimiento cuando se marca la opción de correo. Los mensajes externos por email o WhatsApp no se sincronizan automáticamente. No hay chat en tiempo real: el cliente consulta o vuelve a enviar un mensaje para actualizar el historial.
+
+El acceso administrativo sigue siendo la contraseña del equipo: la firma visible no crea cuentas de empleados ni permite comprobar su identidad individual.
 
 ## Administración, tickets y seguimiento
 

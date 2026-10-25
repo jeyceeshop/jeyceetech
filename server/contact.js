@@ -6,6 +6,7 @@ import {issueChallenge,verifyChallenge,claimChallenge} from './antispam.js';
 import {validateContact} from '../src/contact-data.js';
 import {portalEnabled,portalConfigured} from './portal-store.js';
 import {capturePortal} from './portal-intake.js';
+import {orderPhone} from '../src/phone.js';
 import {displayReference} from '../src/portal-data.js';
 export function smtpConfigIssue(env=process.env){
  const user=env.SMTP_USER?.trim();
@@ -27,8 +28,9 @@ export function makeContactHandler({env=process.env,transportFactory=nodemailer.
  const secret='contact-form:'+String(env.ANTISPAM_SECRET||env.SMTP_PASS||env.SUPABASE_SERVICE_ROLE_KEY);
  if(req.method==='GET')return send(200,{challenge:issueChallenge(secret)});
  if(!req.headers['content-type']?.includes('application/json'))return send(415,{error:'El formato de la solicitud no es válido.'});
- let body,fields;try{body=typeof req.body==='string'?JSON.parse(req.body):req.body;if(!body||body.website)throw Error('La verificación antispam no es válida.');fields=validateContact(body);}catch(error){return send(400,{error:error instanceof SyntaxError?'La solicitud no es válida.':error.message});}
+ let body,fields;try{body=typeof req.body==='string'?JSON.parse(req.body):req.body;if(!body||body.website)throw Error('La verificación antispam no es válida.');fields=validateContact(body);if(body.supportTicket===true)fields.phone=orderPhone(body);}catch(error){return send(400,{error:error instanceof SyntaxError?'La solicitud no es válida.':error.message});}
  const proof=verifyChallenge(body.antispam,secret);if(!proof||!claimChallenge(proof))return send(400,{error:'La respuesta antispam es incorrecta o ha caducado. Responde la nueva pregunta e inténtalo de nuevo.'});
+ if(body.supportTicket===true&&!portal)return send(503,{error:'El centro de tickets está pendiente de activación. Escribe a support@jeycee.shop.'});
  const reference=portal?createOrderNumber():'JC-'+randomUUID().slice(0,8).toUpperCase();
  if(portal){try{const saved=await capturePortal({env,req,fields,reference,kind:'ticket',submissionId:body.submissionId,proof,config,transportFactory,store:portalStore,notifier});return send(200,{sent:true,portal:true,reference:displayReference(saved.entry.reference),tracking:saved.tracking});}catch(error){if(error.retryAfter)res.setHeader('Retry-After',String(error.retryAfter));return send(error.status||503,{error:error.status&&error.status!==503?error.message:'No pudimos registrar tu consulta. Conserva el formulario e inténtalo de nuevo.'});}}
  const emailContent=buildContactEmail(fields,reference);

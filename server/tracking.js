@@ -29,7 +29,10 @@ export function makeTrackingHandler({env=process.env,store}={}){return async fun
    await db.limit('tracking-message',reference,10,600);await db.clientMessage(reference,data.message.trim(),data.messageId);
   }else if(data.action!=='lookup')return send(400,{error:'Acción no válida.'});
   const updated=data.action==='message'?await db.find(reference):entry;
-  const messages=conversationAvailable?(await db.messages(reference,true)).filter(m=>m.visibility==='public').map(({id,author,body,status,created_at})=>({id,author,body,status,created_at})):[{id:'current-status',author:'system',body:statusFor(entry.status).hint,status:entry.status,created_at:entry.updated_at||entry.created_at}];
+  const messages=conversationAvailable?(await db.messages(reference,true)).filter(m=>m.visibility==='public').map(({id,author,body,status,created_at,staff_name,staff_role})=>({id,author,body,status,created_at,staff_name,staff_role})):[{id:'current-status',author:'system',body:statusFor(entry.status).hint,status:entry.status,created_at:entry.updated_at||entry.created_at}];
+  // The original ticket text is part of its conversation only after contact verification.
+  // Order briefs and legacy number-only views remain excluded.
+  if(conversationAvailable&&verifiedContact&&entry.kind==='ticket')messages.unshift({id:'original-ticket',author:'client',body:entry.content,status:null,created_at:entry.created_at});
   return send(200,{entry:publicEntry(updated),conversationAvailable,contactRequired:needsContact&&!verifiedContact&&!!(entry.email||entry.phone),messages});
  }catch(error){if(error.retryAfter)res.setHeader('Retry-After',String(error.retryAfter));return send(error.status||503,{error:error.status&&error.status!==503?error.message:'No pudimos consultar el seguimiento. Inténtalo de nuevo más tarde.'});}
 };}

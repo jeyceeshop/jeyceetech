@@ -5,13 +5,7 @@
       "destination": "/index.html"
     }
   ],
-  "redirects": [
-    {
-      "source": "/soporte",
-      "destination": "/contacto?tipo=soporte",
-      "permanent": true
-    }
-  ],
+  "redirects": [],
   "functions": {
     "api/contact.js": {
       "maxDuration": 60
@@ -24,6 +18,9 @@
     },
     "api/tracking.js": {
       "maxDuration": 30
+    },
+    "api/promotions.js": {
+      "maxDuration": 60
     }
   },
   "headers": [

@@ -24,7 +24,7 @@ export function initTracking(){
  lookup.addEventListener('submit',async event=>{
   event.preventDefault();if(lookupGuard.button.disabled)return;lookupGuard.setBusy(true);lookupStatus.textContent='Consultando…';
   try{
-   const values={reference:lookup.elements.reference.value.trim()},data=await portalRequest('/api/tracking',{method:'POST',body:JSON.stringify({...values,action:'lookup',antispam:lookupGuard.guard.payload()})});
+   const values={reference:lookup.elements.reference.value.trim(),...(lookup.elements.contact.value.trim()?{contact:lookup.elements.contact.value.trim()}:{})},data=await portalRequest('/api/tracking',{method:'POST',body:JSON.stringify({...values,action:'lookup',antispam:lookupGuard.guard.payload()})});
    credentials=values;verify.elements.contact.value='';reply.elements.message.value='';lastMessage='';paint(data);lookup.hidden=true;result.hidden=false;lookupStatus.textContent='';replyStatus.textContent='';verifyStatus.textContent='';await prepareConversation(data);result.focus({preventScroll:true});result.scrollIntoView({block:'start',behavior:'instant'});
   }catch(error){lookupStatus.textContent=error.message;}finally{await lookupGuard.renew();lookupGuard.setBusy(false);}
  });

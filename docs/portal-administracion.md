@@ -74,7 +74,7 @@ Mientras una instalación anterior no aplique ese SQL, la captura conserva compa
 
 Se usa versión de registro para evitar sobrescribir cambios de otra pestaña. Los formularios tienen identificadores de envío estables durante el intento, y la base evita duplicar la misma solicitud o mensaje por un reintento. El contenido se muestra como texto, sin ejecutar HTML de clientes o administradores.
 
-No incluyas datos sensibles en notas o respuestas. Mantén una política de conservación y atiende solicitudes de acceso/eliminación de datos desde `hello@jeycee.shop`. Las solicitudes públicas solo devuelven servicio, plan, estado, fechas y mensajes públicos; no devuelven datos de contacto, brief original ni notas internas.
+No incluyas datos sensibles en notas o respuestas. Mantén una política de conservación y atiende solicitudes de acceso/eliminación de datos desde `hello@jeycee.shop`. Las solicitudes públicas solo devuelven servicio, plan, estado, fechas y mensajes públicos; no devuelven datos de contacto ni notas internas. El brief de un pedido permanece en administración; la consulta original de un ticket solo se muestra en su conversación después de comprobar el contacto.
 
 ## Validación realizada
 
@@ -93,3 +93,16 @@ El contador de PostgreSQL es compartido por pedidos y tickets nuevos. Empieza en
 La referencia interna se guarda con ocho dígitos para respetar las restricciones de las tablas existentes; la web, correos y WhatsApp usan la versión corta. La función asigna el contador en una transacción, conserva el número al reintentar el mismo envío y salta cualquier referencia ya existente. Solo el servidor con `service_role` puede solicitar numeración.
 
 Hasta que se ejecute el SQL, el backend mantiene la recepción actual con las referencias largas. Después utiliza el contador automáticamente, sin cambios adicionales en Vercel. La página pública muestra el estado por número; la conversación de los códigos cortos requiere confirmar un dato de contacto existente.
+
+## Actualización: centro de ayuda y cupones por correo
+
+1. En Supabase → SQL Editor → New query, ejecuta todo [database/support-promotions.sql](../database/support-promotions.sql). Se puede repetir sin borrar datos ni reiniciar el contador; incluye la numeración JC-0001 si aún no la activaste.
+2. Espera al último despliegue de main en Vercel. Usa las mismas variables actuales, sin añadir secretos.
+3. Abre `/soporte` para crear un ticket. En `/seguimiento`, indica su número y email/teléfono para conversar. El contacto es opcional para consultar solo el estado.
+4. En `/admin`, completa **Tu firma de atención** con nombre y cargo. Las respuestas y actualizaciones públicas guardan esa firma; las notas internas siguen privadas. Marca la opción de correo para notificar al cliente.
+5. En la homepage solicita un cupón con un buzón que controles. La sección `/admin` → **Correos y cupones** muestra su código personal, porcentaje (1–15%), fecha, consentimiento opcional de novedades y estado del envío. Puedes desactivar o reactivar códigos y descargar 50 registros por página en CSV.
+6. Aplica el código en un brief indicando el mismo correo. El servidor vuelve a validar antes de crear el pedido. Si la promoción vigente es mejor, conserva ese precio sin acumular descuentos.
+
+Los registros repetidos conservan el mismo cupón; el reenvío espera cinco minutos. Un error SMTP no borra ni vuelve a sortear el descuento. Registrar un email solicita únicamente el cupón; no se envían novedades automáticamente, y el permiso para ellas es una casilla independiente. El código público JEYCEE10 y el juego anterior dejan de estar activos. La tabla nueva y sus funciones solo son accesibles con service_role desde el servidor; no se publican correos ni códigos en la API de registro.
+
+Si ya había un ticket abierto, responde en su conversación en lugar de abrir uno nuevo. Los correos y mensajes de WhatsApp enviados fuera del portal no se incorporan automáticamente al historial. El portal conserva una contraseña compartida del equipo: nombre/cargo son firmas declaradas, no cuentas de empleados con roles individuales.

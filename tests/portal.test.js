@@ -103,15 +103,15 @@ test('an existing schema keeps receiving orders with status-only references unti
 test('admin replies and internal notes persist independently of SMTP; stale versions and invalid dates are rejected',async()=>{
  const db=store();let notified=0;const handler=makeAdminHandler({env,store:db,notifier:async()=>{notified++;throw Error('SMTP failure');}});
  let res=response();await handler(req('POST',{action:'note',reference},{version:1,message:'Nota privada',notify:true},true),res);assert.equal(res.code,200);assert.equal(notified,0);
- res=response();await handler(req('POST',{action:'reply',reference},{version:2,message:'Respuesta para cliente',notify:true},true),res);assert.equal(res.code,200);assert.equal(res.data.notification,'failed');assert.equal(notified,1);assert.ok(db.thread.some(m=>m.body==='Respuesta para cliente'&&m.visibility==='public'));
- res=response();await handler(req('POST',{action:'update',reference},{version:1,status:'completed',assignee:'A',dueDate:''},true),res);assert.equal(res.code,409);
+ res=response();await handler(req('POST',{action:'reply',reference},{version:2,message:'Respuesta para cliente',notify:true,staffName:'Ana Pérez',staffRole:'Soporte'},true),res);assert.equal(res.code,200);assert.equal(res.data.notification,'failed');assert.equal(notified,1);assert.ok(db.thread.some(m=>m.body==='Respuesta para cliente'&&m.visibility==='public'));
+ res=response();await handler(req('POST',{action:'update',reference},{version:1,status:'completed',assignee:'A',dueDate:'',staffName:'Ana Pérez',staffRole:'Soporte'},true),res);assert.equal(res.code,409);
  res=response();await handler(req('POST',{action:'update',reference},{version:3,status:'completed',assignee:'A',dueDate:'2026-02-30'},true),res);assert.equal(res.code,400);
 });
 test('new orders and contact forms are saved once with number-only tracking and preserve existing mail routes',async()=>{
  for(const kind of ['order','ticket']){
   const db=store(),mail=[];const options={env,portalStore:db,notifier:async()=> 'not_requested',transportFactory:()=>({async sendMail(data){mail.push(data);return {accepted:[data.to]};},close(){}})};
   const handler=kind==='order'?makeOrdersHandler(options):makeContactHandler(options),submissionId=randomUUID();
-  const data=kind==='order'?{product:'desarrollo-web--basico',name:'Cliente',countryCode:'+507',phone:'61234567',brief:'Quiero una web para mi marca.',coupon:'JEYCEE10',privacy:true,submissionId}:{topic:'soporte',name:'Cliente',email:'cliente@example.com',message:'Necesito ayuda con mi entrega.',privacy:true,submissionId};
+  const data=kind==='order'?{product:'desarrollo-web--basico',name:'Cliente',countryCode:'+507',phone:'61234567',brief:'Quiero una web para mi marca.',coupon:'',privacy:true,submissionId}:{topic:'soporte',name:'Cliente',email:'cliente@example.com',message:'Necesito ayuda con mi entrega.',privacy:true,submissionId};
   let first;
   for(let i=0;i<2;i++){const res=response();await handler(req('POST',{}, {...data,antispam:await challenge(handler)}),res);assert.equal(res.code,200);assert.equal(res.data.portal,true);assert.equal('key' in res.data.tracking,false);assert.match(res.data.number||res.data.reference,/^JC-\d{8}-[A-F0-9]{24}$/);const ref=res.data.number||res.data.reference;if(first)assert.equal(ref,first);first=ref;assert.ok(res.data.tracking.url.includes('#'));assert.ok(!res.data.tracking.url.includes('clave='));}
   assert.equal(mail.length,1);assert.equal(mail[0].to,kind==='order'?'business@jeycee.shop':'support@jeycee.shop');assert.ok(mail[0].text.includes(first));assert.equal(db.captured.price,kind==='order'?261:null);assert.ok(!JSON.stringify(db.captured).includes('SEGUIMIENTO PRIVADO'));
@@ -125,4 +125,10 @@ test('a persisted order remains created when mail fails; portal notifications us
  assert.equal(res.code,200);assert.equal(res.data.created,true);assert.ok(db.captured);assert.equal(mailStatus,'failed');
  let mail;const result=await notifyPortal(db.entry,'Respuesta <script>no ejecutar</script>',{env,trackingUrl:'https://jeycee-tech.vercel.app/seguimiento#pedido='+reference,transportFactory:()=>({async sendMail(data){mail=data;return {accepted:[data.to]};},close(){}})});
  assert.equal(result,'sent');assert.equal(mail.to,'private@example.com');assert.equal(mail.replyTo,'business@jeycee.shop');assert.ok(mail.html.includes('Tu proyecto.<br>Cada paso, más cerca.'));assert.ok(mail.html.includes('Ver seguimiento'));assert.ok(mail.html.includes('&lt;script&gt;'));assert.ok(!mail.html.includes('<script>'));assert.ok(mail.text.includes('Respuesta <script>'));assert.equal(mail.attachments[0].cid,'jeycee-contact-mark');
+});
+
+test('verified ticket conversations include the original question and the staff signature without exposing internal notes',async()=>{
+ const db=store();db.entry.reference='JC-00000001';db.entry.kind='ticket';db.entry.content='Mi consulta inicial de soporte.';db.thread[0].staff_name='Ana Pérez';db.thread[0].staff_role='Soporte especializado';const handler=makeTrackingHandler({env,store:db});
+ let res=response();await handler(req('POST',{}, {action:'lookup',reference:'JC-0001',antispam:await challenge(handler)}),res);assert.equal(res.code,200);assert.ok(!JSON.stringify(res.data).includes('Mi consulta inicial'));
+ res=response();await handler(req('POST',{}, {action:'lookup',reference:'JC-0001',contact:'private@example.com',antispam:await challenge(handler)}),res);assert.equal(res.code,200);assert.ok(res.data.messages.some(m=>m.body==='Mi consulta inicial de soporte.'));assert.ok(res.data.messages.some(m=>m.staff_name==='Ana Pérez'&&m.staff_role==='Soporte especializado'));assert.ok(!JSON.stringify(res.data).includes('NOTA SECRETA'));
 });

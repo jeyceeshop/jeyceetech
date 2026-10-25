@@ -2,7 +2,8 @@ import nodemailer from 'nodemailer';
 import {smtpConfig,smtpConfigIssue} from './contact.js';
 import {issueChallenge,verifyChallenge,claimChallenge} from './antispam.js';
 import {premiumServices,tiersFor} from '../src/premium.js';
-import {couponQuote} from '../src/coupons.js';
+import {personalCouponQuote} from './promotions.js';
+import {makePortalStore} from './portal-store.js';
 import {createOrderNumber} from '../src/order-drafts.js';
 import {briefMessage,whatsappUrl} from '../src/whatsapp.js';
 import {mailboxes} from '../src/email-routing.js';
@@ -28,7 +29,8 @@ export function makeOrdersHandler({env=process.env,transportFactory=nodemailer.c
   if(!product)throw Error('El servicio o plan no existe.');
   for(const key of ['name','brief','email','company','coupon','countryCode','phone'])if(data[key]!==undefined&&typeof data[key]!=='string')throw Error('Revisa los datos del pedido.');
   if(/[\r\n]/.test(data.name||''))throw Error('Revisa tu nombre.');
-  offer=couponQuote(product,data.coupon);briefMessage(product,data,'por asignar',offer);
+  if(data.coupon&&!portal)return send(400,{error:'Los cupones requieren el portal activo. Puedes continuar sin cupón.'});
+  offer=data.coupon?await personalCouponQuote(portalStore||makePortalStore(env),product,data.coupon,data.email):await personalCouponQuote(null,product,'',data.email);briefMessage(product,data,'por asignar',offer);
  }catch(error){return send(400,{error:error instanceof SyntaxError?'Solicitud no válida.':error.message});}
  const proof=verifyChallenge(data.antispam,secret);if(!proof||!claimChallenge(proof))return send(400,{error:'La verificación antispam es incorrecta o caducó. Responde la nueva pregunta.'});
  const number=createOrderNumber(),createdAt=new Date().toISOString();

@@ -1,8 +1,6 @@
-// Campaña autorizada: se aplica al precio regular y conserva la mejor promoción.
-export const brandCoupon={code:'JEYCEE10',type:'percent',value:10,active:true,stackWithPromotion:false};
-export const activeCoupons=[brandCoupon];
-export const couponSessionKey='jeycee-brand-coupon';
-export const couponTerms='10% sobre el precio regular del servicio. No acumulable con otras promociones: conservamos el mejor precio. En planes mensuales, aplica al primer periodo; en Business, el importe se calcula en la propuesta. No incluye asesoramiento, impuestos ni costos de terceros.';
+// Los códigos personales se emiten y validan en el servidor, nunca en el navegador.
+export const activeCoupons=[];
+export const couponTerms='Cupón personal del 1% al 15%, asignado al azar una sola vez por correo y vinculado a esa dirección. Sobre el precio regular del servicio. No acumulable con otras promociones: conservamos el mejor precio. En planes mensuales aplica al primer periodo; en Business se calcula en la propuesta. No incluye asesoramiento, impuestos ni costos de terceros. Sin fecha de vencimiento programada; la agencia puede desactivar códigos por uso indebido. No acredita contratación ni pago.';
 export function couponQuote(product,raw='',{rules=activeCoupons,now=new Date()}={}){
  const code=String(raw).trim().toUpperCase();
  if(!code)return {code:'',discount:0,price:product?.price??null,applied:false,pending:false};

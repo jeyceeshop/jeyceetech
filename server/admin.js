@@ -20,8 +20,13 @@ export function makeAdminHandler({env=process.env,store,notifier=notifyPortal}={
   if(action==='logout'&&req.method==='POST'){readJson(req);res.setHeader('Set-Cookie',sessionCookie(req,env));return send(200,{authenticated:false});}
   if(action==='list'&&req.method==='GET'){
    const kind=['order','ticket'].includes(req.query?.kind)?req.query.kind:'',status=serviceStatuses.some(s=>s.id===req.query?.status)?req.query.status:'';
-   const search=String(req.query?.search||'').replace(/[^\p{L}\p{N} @._+-]/gu,'').slice(0,80),page=Math.max(0,Math.min(10000,parseInt(req.query?.page,10)||0));
+   const rawSearch=String(req.query?.search||'').replace(/[^\p{L}\p{N} @._+-]/gu,'').slice(0,80),search=/^(?:JC-)?\d{4,8}$/i.test(rawSearch)?storageReference(rawSearch.toUpperCase()):rawSearch,page=Math.max(0,Math.min(10000,parseInt(req.query?.page,10)||0));
    const [list,stats]=await Promise.all([db.list({kind,status,search,page}),db.stats()]);return send(200,{...list,entries:list.entries.map(adminEntry),stats,page});
+  }
+  if(action==='subscribers'&&req.method==='GET')return send(200,await db.subscribers(Math.max(0,Math.min(10000,parseInt(req.query?.page,10)||0))));
+  if(action==='coupon-status'&&req.method==='POST'){
+   const data=readJson(req);if(typeof data.id!=='string'||!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(data.id)||typeof data.active!=='boolean')return send(400,{error:'Cupón no válido.'});
+   await db.toggleCoupon(data.id,data.active);return send(200,{updated:true});
   }
   const reference=storageReference(String(req.query?.reference||'').trim().toUpperCase());if(!portalReferencePattern.test(reference))return send(400,{error:'Referencia no válida.'});
   if(action==='detail'&&req.method==='GET'){const entry=await db.find(reference);if(!entry)return send(404,{error:'No encontramos esa solicitud.'});return send(200,{entry:adminEntry(entry),messages:await db.messages(reference)});}
@@ -34,12 +39,16 @@ export function makeAdminHandler({env=process.env,store,notifier=notifyPortal}={
    if(!serviceStatuses.some(s=>s.id===data.status)||typeof data.assignee!=='string'||data.assignee.length>100||typeof data.dueDate!=='string'||data.dueDate&&!/^\d{4}-\d{2}-\d{2}$/.test(data.dueDate)||data.dueDate&&(!Number.isFinite(Date.parse(data.dueDate+'T00:00:00Z'))||new Date(data.dueDate+'T00:00:00Z').toISOString().slice(0,10)!==data.dueDate))return send(400,{error:'Revisa el estado, responsable y fecha objetivo.'});
    payload={status:data.status,assignee:data.assignee.trim(),dueDate:data.dueDate,message};
   }else{if(!message)return send(400,{error:'Escribe un mensaje.'});payload={message};}
+  if(action!=='note'){
+   if(typeof data.staffName!=='string'||data.staffName.trim().length<2||data.staffName.length>80||typeof data.staffRole!=='string'||data.staffRole.trim().length<2||data.staffRole.length>100||/[\r\n]/.test(data.staffName+data.staffRole))return send(400,{error:'Indica tu nombre y cargo para identificar la atención al cliente.'});
+  }
+  payload.staffName=typeof data.staffName==='string'?data.staffName.trim().slice(0,80):'';payload.staffRole=typeof data.staffRole==='string'?data.staffRole.trim().slice(0,100):'';
   const entry=await db.action(reference,data.version,action,payload);if(!entry)return send(404,{error:'No encontramos esa solicitud.'});
   let notification='not_requested';
   if(data.notify===true&&action!=='note'){
    const link=trackingLink(env,reference);
    const text=message||'Actualizamos el estado de tu solicitud a: '+serviceStatuses.find(s=>s.id===entry.status).label+'. Revisa el historial con tu número de solicitud: '+link;
-   try{notification=await notifier(entry,text,{env,trackingUrl:link});}catch{notification='failed';}
+   try{notification=await notifier(entry,text,{env,trackingUrl:link,staffName:payload.staffName,staffRole:payload.staffRole});}catch{notification='failed';}
   }
   return send(200,{entry:adminEntry(entry),notification});
  }catch(error){if(error.retryAfter)res.setHeader('Retry-After',String(error.retryAfter));return send(error.status||503,{...(error.portalCode?{code:error.portalCode}:{}),error:error.portalMessage||(error.status&&error.status!==503?error.message:'No pudimos completar la operación. Revisa la configuración del portal e inténtalo de nuevo.')});}

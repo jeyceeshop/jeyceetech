@@ -103,3 +103,9 @@ La web prepara el destinatario y un asunto con área/referencia. No envía autom
 El inicio incluye, al final, las tarjetas de Asistente de mercadeo y Telemarketing. El pie enlaza a `/trabaja-con-nosotros`, con ambas vacantes, funciones, requisitos, estándares de excelencia y proceso de postulación. Datos y plantillas en `src/careers.js`. Las cinco estrellas representan un objetivo de atención, no testimonios o puntuación de clientes.
 
 Cada botón abre un correo a rrhh@jeycee.shop con `[EMPLEO]` y el nombre del cargo en el asunto. El candidato debe adjuntar su CV y confirmar el envío desde su correo. No hay carga de CV en servidor ni confirmación automática de recepción, entrevista o contratación. Modalidad, horario y remuneración no se inventan; deben confirmarse con RRHH.
+
+## Inicio simplificado
+
+La homepage se concentra en portada, Desarrollo web y Diseño gráfico destacados, tres familias de servicios, resumen de cotización/asesoría y enlace a Contáctanos. El contenido ampliado de manifiesto, orientación por etapa, criterios de trabajo y proceso se conserva en `src/studio-sections.js`, mostrado en Quiénes somos. Planes, FAQ, formulario de contacto y todos los servicios continúan en sus páginas respectivas. El enlace de asesoría del pie mantiene su ancla en el inicio.
+
+Trabaja con nosotros se accede únicamente desde el pie de página; las dos vacantes y sus requisitos se mantienen en `/trabaja-con-nosotros`. La homepage no presenta tarjetas de vacantes.

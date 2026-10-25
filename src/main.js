@@ -15,10 +15,7 @@ const nav=document.querySelector('nav');nav.id='primary-navigation';nav.innerHTM
 document.querySelectorAll('a[href="#inicio"]').forEach(a=>a.href='/');document.querySelector('.nav-contact').href='/contacto';document.querySelector('.nav-contact').firstChild.textContent='Contáctanos ';
 const main=document.querySelector('main');
 if(path!=='/'){const page=renderPage(path);main.className='inner-page section';main.innerHTML=page.html;document.title=page.title+' | JeyCee Tech';document.querySelector('meta[name=description]').content=page.title+' — JeyCee Tech. Diseño, estrategia y experiencias digitales en Panamá.';}else{
- main.innerHTML=renderHome(document.querySelector('#contacto').outerHTML);
- const inquiry=main.querySelector('#contact-form select[name=service]');inquiry.innerHTML='<option value="">Selecciona un servicio</option>'+services.map(s=>`<option>${s.name}</option>`).join('')+'<option>Un proyecto integral</option>';
- document.querySelector('#contacto .form-note').textContent='Tu cotización es gratis. Prepara tu brief y envíalo a business@jeycee.shop desde tu aplicación de correo.';
- document.querySelector('#contacto .contact-intro').insertAdjacentHTML('beforeend','<p><a href="mailto:business@jeycee.shop">business@jeycee.shop ↗</a><br/>Pagos manuales por Yappy: 6827-4965</p>');
+ main.innerHTML=renderHome();
 }
 document.querySelector('footer').insertAdjacentHTML('afterbegin',`<div class="footer-directory"><div><span class="eyebrow">HAZ QUE TU MARCA EVOLUCIONE</span><h2>Hablemos de<br/><em>lo que viene.</em></h2><a href="mailto:business@jeycee.shop">business@jeycee.shop ↗</a><p>Panamá · USD · Pagos por Yappy</p></div><div><h3>Explora</h3><a href="/servicios">Servicios</a><a href="/planes">Planes premium</a><a href="/#asesoramiento">Asesoramiento · $20 acreditables</a><a href="/resenas">Reseñas</a><a href="/quienes-somos">Quiénes somos</a><a href="/trabaja-con-nosotros">Trabaja con nosotros</a></div><div><h3>Te acompañamos</h3><a href="/contacto">Contáctanos</a><a href="/facturacion">Facturación</a><a href="/preguntas-frecuentes">Preguntas frecuentes</a><a href="/privacidad">Privacidad</a><a href="/terminos">Condiciones</a></div></div>`);
 initContact();

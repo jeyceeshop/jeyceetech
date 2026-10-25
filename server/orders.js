@@ -10,6 +10,7 @@ import {buildContactEmail} from './contact-email.js';
 import {orderPhone} from '../src/phone.js';
 import {portalEnabled,portalConfigured} from './portal-store.js';
 import {capturePortal} from './portal-intake.js';
+import {displayReference} from '../src/portal-data.js';
 export function makeOrdersHandler({env=process.env,transportFactory=nodemailer.createTransport,portalStore,notifier}={}){return async function handler(req,res){
  const send=(code,data)=>res.status(code).json(data);res.setHeader('Cache-Control','no-store');
  if(!['GET','POST'].includes(req.method)){res.setHeader('Allow','GET, POST');return send(405,{error:'Método no permitido.'});}
@@ -35,8 +36,8 @@ export function makeOrdersHandler({env=process.env,transportFactory=nodemailer.c
  const fields={phone:orderPhone(data),name:data.name.trim(),email:(data.email||'').trim(),company:(data.company||'').trim(),service:product.name,projectRef:number,topic:{title:'Nuevo pedido',email:mailboxes.business},message};
  if(portal){try{
   const saved=await capturePortal({env,req,fields,reference:number,kind:'order',submissionId:data.submissionId,proof,product,offer,content:data.brief.trim(),config,transportFactory,store:portalStore,notifier});
-  const e=saved.entry,orderMessage=briefMessage(product,data,e.reference,offer)+(saved.tracking?'\n\nSeguimiento privado: '+saved.tracking.url:'');
-  return send(200,{created:true,portal:true,number:e.reference,productKey:e.product_key,createdAt:e.created_at,price:e.price,coupon:e.coupon,whatsappUrl:whatsappUrl(orderMessage),tracking:saved.tracking});
+  const e=saved.entry,publicNumber=displayReference(e.reference),orderMessage=briefMessage(product,data,publicNumber,offer)+(saved.tracking?'\n\nSeguimiento: '+saved.tracking.url:'');
+  return send(200,{created:true,portal:true,number:publicNumber,productKey:e.product_key,createdAt:e.created_at,price:e.price,coupon:e.coupon,whatsappUrl:whatsappUrl(orderMessage),tracking:saved.tracking});
  }catch(error){if(error.retryAfter)res.setHeader('Retry-After',String(error.retryAfter));return send(error.status||503,{error:error.status&&error.status!==503?error.message:'No pudimos guardar tu pedido. Tus datos siguen en el formulario; reintenta en un momento.'});}}
  let transport;
  try{

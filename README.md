@@ -157,7 +157,7 @@ El brief solicita nombre y objetivo; correo y empresa son opcionales. Se retirar
 
 ## Pedidos numerados y cupón opcional en el brief
 
-Al solicitar por WhatsApp se muestra **Pedido creado** y un número `JC-AAAAMMDD-XXXXXXXX` (fecha de Panamá y sufijo aleatorio). El mismo número se incluye en el texto de WhatsApp. La interfaz aclara que se creó en el dispositivo y sigue pendiente de enviar/confirmar por la agencia; no acredita recepción, contrato ni pago. Repetir la solicitud sin cambiar el contenido conserva el número durante la sesión. Una nueva combinación de datos/plan genera otro número.
+Al solicitar por WhatsApp se muestra **Pedido creado** y un número de solicitud. En el portal con el contador instalado se usa JC-0001, JC-0002…; las referencias largas de versiones anteriores se siguen admitiendo. El mismo número se incluye en el texto de WhatsApp. La interfaz aclara que se creó en el dispositivo y sigue pendiente de enviar/confirmar por la agencia; no acredita recepción, contrato ni pago. Repetir la solicitud sin cambiar el contenido conserva el número durante la sesión. Una nueva combinación de datos/plan genera otro número.
 
 Se guardan como máximo 20 referencias en localStorage, con número, clave del servicio, fecha, precio estimado y cupón; nunca nombre, correo, empresa ni brief. Al recargar se informa la última referencia. Si el almacenamiento está bloqueado, se conserva la solicitud en memoria y se avisa al cliente para que copie el número. El portal activado añade registro central en Supabase y estados manuales. WhatsApp no sincroniza estados automáticamente. Sin el portal, las referencias siguen siendo metadatos locales de la notificación por correo.
 
@@ -193,4 +193,10 @@ Nuevas rutas: `/admin` (contraseña y sesión de servidor), `/admin/demo` (ejemp
 
 Para activar el almacenamiento real ejecuta `database/portal.sql` y configura los secretos de Vercel siguiendo [la guía completa](docs/portal-administracion.md). El código no contiene una contraseña predeterminada ni credenciales de producción. Mientras `PORTAL_ENABLED` esté desactivado, se conserva el envío por correo existente. Al activarlo, las nuevas solicitudes se guardan en Supabase; la confirmación depende de esa escritura y las notificaciones por correo son adicionales. Los registros anteriores no se importan automáticamente.
 
-El seguimiento del cliente ya no solicita clave. Las nuevas referencias usan un sufijo aleatorio de 24 caracteres y permiten consultar estado y conversación. Las referencias antiguas conservan consulta de estado; sus conversaciones previas siguen en administración. Para actualizar una base instalada con la versión anterior, ejecuta `database/portal-number-only.sql`; el modo de compatibilidad mantiene la recepción de formularios antes de esa actualización.
+El seguimiento del cliente ya no solicita clave. Las referencias largas de la versión anterior mantienen compatibilidad. La numeración actual del portal puede activarse como JC-0001, JC-0002… mediante la actualización descrita abajo. Las referencias antiguas conservan consulta de estado; sus conversaciones previas siguen en administración. Para actualizar una base instalada con la versión anterior, ejecuta `database/portal-number-only.sql`; el modo de compatibilidad mantiene la recepción de formularios antes de esa actualización.
+
+## Numeración secuencial de solicitudes
+
+Ejecuta `database/portal-sequential-numbers.sql` para activar JC-0001, JC-0002… en una base existente; `database/portal.sql` ya lo incluye en instalaciones nuevas. El contador PostgreSQL persiste entre despliegues, admite hasta ocho dígitos y comparte serie entre pedidos y tickets. Reintentar un envío no consume otro número; una operación fallida puede dejar un salto. No se renumeran registros anteriores. Mientras falta esa función SQL, el servidor sigue recibiendo solicitudes con el flujo compatible actual.
+
+El estado puede verse con el número y antispam. Para acceder a la conversación de los números cortos se confirma el correo o teléfono de la solicitud; no hay una clave nueva que recordar. Los datos de contacto y las notas internas no se publican.

@@ -1,7 +1,7 @@
 import {adminConfigurationIssues,passwordMatches,sessionValue,isAdmin,sessionCookie,sameOrigin,readJson,privateHeaders} from './admin-auth.js';
 import {makePortalStore,portalConfigurationIssues,requestIp,adminEntry,trackingLink} from './portal-store.js';
 import {notifyPortal} from './portal-email.js';
-import {serviceStatuses,portalReferencePattern} from '../src/portal-data.js';
+import {serviceStatuses,portalReferencePattern,storageReference} from '../src/portal-data.js';
 export function makeAdminHandler({env=process.env,store,notifier=notifyPortal}={}){return async function(req,res){
  privateHeaders(res);const send=(status,body)=>res.status(status).json(body);const action=String(req.query?.action||'session');
  if(!['GET','POST'].includes(req.method)){res.setHeader('Allow','GET, POST');return send(405,{error:'Método no permitido.'});}
@@ -23,7 +23,7 @@ export function makeAdminHandler({env=process.env,store,notifier=notifyPortal}={
    const search=String(req.query?.search||'').replace(/[^\p{L}\p{N} @._+-]/gu,'').slice(0,80),page=Math.max(0,Math.min(10000,parseInt(req.query?.page,10)||0));
    const [list,stats]=await Promise.all([db.list({kind,status,search,page}),db.stats()]);return send(200,{...list,entries:list.entries.map(adminEntry),stats,page});
   }
-  const reference=String(req.query?.reference||'').toUpperCase();if(!portalReferencePattern.test(reference))return send(400,{error:'Referencia no válida.'});
+  const reference=storageReference(String(req.query?.reference||'').trim().toUpperCase());if(!portalReferencePattern.test(reference))return send(400,{error:'Referencia no válida.'});
   if(action==='detail'&&req.method==='GET'){const entry=await db.find(reference);if(!entry)return send(404,{error:'No encontramos esa solicitud.'});return send(200,{entry:adminEntry(entry),messages:await db.messages(reference)});}
   if(req.method!=='POST'||!['update','reply','note'].includes(action))return send(405,{error:'Acción o método no permitido.'});
   const data=readJson(req);if(!Number.isInteger(data.version)||data.version<1)return send(400,{error:'Recarga el registro antes de modificarlo.'});

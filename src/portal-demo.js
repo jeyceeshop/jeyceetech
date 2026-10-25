@@ -1,9 +1,9 @@
 // Fixture aislada: nunca consulta ni modifica APIs o datos reales.
 const created=new Date().toISOString();
 const rows=[
- {reference:'JC-20261025-DE000001',kind:'order',name:'Marca de ejemplo',service:'Desarrollo web',plan:'Básico',price:261,status:'in_progress',content:'DATOS FICTICIOS. Web corporativa de 3 páginas para una marca de ejemplo.',assignee:'Equipo web'},
- {reference:'JC-20261025-DE000002',kind:'order',name:'Proyecto de muestra',service:'Diseño gráfico',plan:'Pro',price:130.5,status:'waiting_client',content:'DATOS FICTICIOS. Campaña visual; falta recibir los textos aprobados.',assignee:'Equipo de diseño'},
- {reference:'JC-DE000003',kind:'ticket',name:'Cliente de demostración',service:'Soporte de un proyecto',plan:'',price:null,status:'received',content:'DATOS FICTICIOS. Consulta sobre una entrega de muestra.',assignee:''}
+ {reference:'JC-0001',kind:'order',name:'Marca de ejemplo',service:'Desarrollo web',plan:'Básico',price:261,status:'in_progress',content:'DATOS FICTICIOS. Web corporativa de 3 páginas para una marca de ejemplo.',assignee:'Equipo web'},
+ {reference:'JC-0002',kind:'order',name:'Proyecto de muestra',service:'Diseño gráfico',plan:'Pro',price:130.5,status:'waiting_client',content:'DATOS FICTICIOS. Campaña visual; falta recibir los textos aprobados.',assignee:'Equipo de diseño'},
+ {reference:'JC-0003',kind:'ticket',name:'Cliente de demostración',service:'Soporte de un proyecto',plan:'',price:null,status:'received',content:'DATOS FICTICIOS. Consulta sobre una entrega de muestra.',assignee:''}
 ].map(e=>({email:'cliente@example.com',phone:'',company:'Empresa ficticia',coupon:'',recipient:'support@jeycee.shop',mail_status:'sent',due_date:null,created_at:created,updated_at:created,version:1,...e}));
 const threads=new Map(rows.map(e=>[e.reference,[{id:crypto.randomUUID(),author:'system',visibility:'public',body:'Solicitud ficticia para explorar el portal.',status:e.status,created_at:created}]]));
 export async function demoRequest(action,params={},data={}){

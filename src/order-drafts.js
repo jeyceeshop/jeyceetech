@@ -1,5 +1,7 @@
 import {orderReferencePattern} from './portal-data.js';
 const storageKey='jeycee-order-numbers-v1';
+// Used by mail-only mode and as a compatible candidate until database numbering is enabled.
+// The database allocates the final sequential number when its RPC is installed.
 export function createOrderNumber(now=new Date()){
  const parts=Object.fromEntries(new Intl.DateTimeFormat('en-CA',{timeZone:'America/Panama',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(now).map(p=>[p.type,p.value]));
  const bytes=crypto.getRandomValues(new Uint8Array(12)),suffix=Array.from(bytes,b=>b.toString(16).padStart(2,'0')).join('').toUpperCase();

@@ -8,6 +8,7 @@ import {makeContactHandler} from '../server/contact.js';
 import {sessionValue,isAdmin} from '../server/admin-auth.js';
 import {notifyPortal} from '../server/portal-email.js';
 import {makePortalStore,trackingLink} from '../server/portal-store.js';
+import {storageReference,displayReference} from '../src/portal-data.js';
 const env={PORTAL_ENABLED:'true',SUPABASE_URL:'https://example.supabase.co',SUPABASE_SERVICE_ROLE_KEY:'server-only-test-placeholder',ADMIN_PASSWORD:'test-long-password-only',ADMIN_SESSION_SECRET:'test-session-secret-with-more-than-32-characters',SMTP_USER:'hello@jeycee.shop',SMTP_PASS:'test-smtp-placeholder',VERCEL:'1'};
 const headers={host:'jeycee.test',origin:'https://jeycee.test','content-type':'application/json','x-forwarded-proto':'https'};
 const response=()=>({headers:{},setHeader(k,v){this.headers[k]=v;},status(code){this.code=code;return this;},json(data){this.data=data;return this;}});
@@ -68,6 +69,25 @@ test('tracking uses only the number and signed antispam; internal notes and cont
  res=response();await handler(req('POST',{}, {action:'lookup',reference,antispam:proof}),res);assert.equal(res.code,400);
  res=response();await handler(req('POST',{}, {action:'message',reference,message:'Mi consulta',messageId:randomUUID(),antispam:await challenge(handler)}),res);assert.equal(res.code,200);assert.ok(res.data.messages.some(m=>m.body==='Mi consulta'));
  res=response();await handler(req('POST',{}, {action:'lookup',reference}),res);assert.equal(res.code,400);
+});
+test('short sequential references require the existing contact before reading or writing the conversation',async()=>{
+ assert.equal(storageReference('JC-0001'),'JC-00000001');assert.equal(storageReference('0001'),'JC-00000001');assert.equal(displayReference('JC-00000001'),'JC-0001');assert.equal(displayReference('JC-00010000'),'JC-10000');assert.equal(storageReference(reference),reference);
+ const db=store();db.entry.reference='JC-00000001';const handler=makeTrackingHandler({env,store:db});
+ let res=response();await handler(req('POST',{}, {action:'lookup',reference:'JC-0001',antispam:await challenge(handler)}),res);assert.equal(res.code,200);assert.equal(res.data.entry.reference,'JC-0001');assert.equal(res.data.contactRequired,true);assert.equal(res.data.conversationAvailable,false);assert.ok(!JSON.stringify(res.data).includes('Respuesta pública'));
+ res=response();await handler(req('POST',{}, {action:'lookup',reference:'JC-0001',contact:'someone@example.com',antispam:await challenge(handler)}),res);assert.equal(res.code,403);assert.ok(!JSON.stringify(res.data).includes('private@example.com'));
+ for(const contact of ['PRIVATE@EXAMPLE.COM','+507 (6123)-4567']){res=response();await handler(req('POST',{}, {action:'lookup',reference:'JC-0001',contact,antispam:await challenge(handler)}),res);assert.equal(res.code,200);assert.equal(res.data.conversationAvailable,true);assert.equal(res.data.contactRequired,false);assert.ok(res.data.messages.some(m=>m.body==='Respuesta pública'));assert.ok(!JSON.stringify(res.data).includes('NOTA SECRETA'));}
+ res=response();await handler(req('POST',{}, {action:'message',reference:'JC-0001',message:'Intento sin contacto',messageId:randomUUID(),antispam:await challenge(handler)}),res);assert.equal(res.code,403);
+ res=response();await handler(req('POST',{}, {action:'message',reference:'JC-0001',contact:'+507 61234567',message:'Mensaje confirmado',messageId:randomUUID(),antispam:await challenge(handler)}),res);assert.equal(res.code,200);assert.ok(res.data.messages.some(m=>m.body==='Mensaje confirmado'));
+ const admin=response();await makeAdminHandler({env,store:db})(req('GET',{action:'detail',reference:'JC-0001'},{},true),admin);assert.equal(admin.code,200);assert.equal(admin.data.entry.reference,'JC-0001');
+});
+test('numbered RPC is preferred, and only an absent numbering function falls back to the existing intake',async()=>{
+ for(const missing of [false,true]){const calls=[];const db=makePortalStore(env,async(url)=>{calls.push(url);if(missing&&url.endsWith('portal_create_numbered_entry'))return new Response(JSON.stringify({code:'PGRST202',message:'Could not find the function public.portal_create_numbered_entry(p_entry)'}),{status:404});return new Response(JSON.stringify({entry:{reference:'JC-00000001'},inserted:true}),{status:200});});assert.equal((await db.create({})).entry.reference,'JC-00000001');assert.equal(calls.length,missing?2:1);assert.ok(calls[0].endsWith('portal_create_numbered_entry'));if(missing)assert.ok(calls[1].endsWith('portal_create_entry'));}
+});
+test('sequential number is consistent across API response, email, WhatsApp and tracking links after an idempotent retry',async()=>{
+ const db=store(),mail=[];let saved;db.create=async record=>{if(saved)return {entry:saved,inserted:false};saved={...record,reference:'JC-00000001',created_at:new Date().toISOString()};return {entry:saved,inserted:true};};
+ const handler=makeOrdersHandler({env,portalStore:db,notifier:async()=> 'not_requested',transportFactory:()=>({async sendMail(data){mail.push(data);return {accepted:[data.to]};},close(){}})}),submissionId=randomUUID();
+ for(let i=0;i<2;i++){const res=response();await handler(req('POST',{}, {name:'Cliente',phone:'61234567',countryCode:'+507',product:'desarrollo-web--basico',brief:'Web de prueba.',privacy:true,submissionId,antispam:await challenge(handler)}),res);assert.equal(res.code,200);assert.equal(res.data.number,'JC-0001');assert.ok(new URL(res.data.whatsappUrl).searchParams.get('text').includes('Número de pedido: JC-0001'));assert.equal(new URLSearchParams(new URL(res.data.tracking.url).hash.slice(1)).get('pedido'),'JC-0001');}
+ assert.equal(mail.length,1);assert.ok(mail[0].subject.includes('[JC-0001]'));assert.ok(mail[0].html.includes('JC-0001'));assert.ok(!mail[0].text.includes('JC-00000001'));assert.ok(!/JC-\d{8}-[A-F0-9]{24}/.test(mail[0].text));
 });
 test('legacy references show status without publishing their former private conversations',async()=>{
  const db=store();db.entry.reference='JC-20261025-A1B2C3D4';const handler=makeTrackingHandler({env,store:db});let res=response();await handler(req('POST',{}, {action:'lookup',reference:db.entry.reference,antispam:await challenge(handler)}),res);assert.equal(res.code,200);assert.equal(res.data.conversationAvailable,false);assert.equal(res.data.entry.status,'received');assert.ok(!JSON.stringify(res.data).includes('Respuesta pública'));assert.ok(!JSON.stringify(res.data).includes('NOTA SECRETA'));

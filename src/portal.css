@@ -7,3 +7,5 @@
 .admin-entry-top>span,.tracking-summary>.eyebrow,.order-created-reference{overflow-wrap:anywhere;word-break:break-word}
 
 #admin-login-status{white-space:pre-line;overflow-wrap:anywhere}
+
+.tracking-layout #tracking-verify{margin-top:25px}.tracking-layout #tracking-verify p{font-size:12px;line-height:1.8;color:#d2b49a}#tracking-verify-status{white-space:pre-line;color:#f2c29b}

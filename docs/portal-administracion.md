@@ -31,7 +31,7 @@ Haz **Redeploy** para que Vercel aplique las variables. El repositorio mantiene 
 
 1. Abre `/admin` e inicia sesión con tu contraseña. La sesión dura hasta 8 horas; puedes cerrarla desde el portal. Cambiar la contraseña o `ADMIN_SESSION_SECRET` invalida las sesiones anteriores.
 2. Crea un pedido de prueba desde un plan de la web, usando datos propios. Guarda el número y el enlace de seguimiento que aparecen al finalizar. Si indicaste correo, se intenta enviar allí también el acceso.
-3. Abre `/seguimiento` en otro navegador y usa únicamente el número y responde el antispam. Las nuevas referencias permiten consultar la conversación sin una clave adicional.
+3. Abre `/seguimiento` en otro navegador y usa únicamente el número y responde el antispam. Los números cortos permiten ver el estado; para abrir su conversación se confirma el correo o teléfono ya indicado en la solicitud, sin crear una clave adicional.
 4. En `/admin`, filtra por pedidos/tickets, abre el registro y actualiza estado, responsable o fecha objetivo. Los estados se cambian manualmente y no verifican pagos.
 5. Envía una respuesta pública y una nota interna. Confirma que la respuesta aparece en Seguimiento y que la nota interna solo aparece en administración. La fecha objetivo es visible al cliente; el responsable interno no.
 6. Responde como cliente desde Seguimiento y comprueba el mensaje en la bandeja del equipo. La bandeja se actualiza con el botón **Actualizar bandeja**; no hay notificaciones push ni sincronización automática en tiempo real.
@@ -62,7 +62,7 @@ Las respuestas y estados del administrador se guardan primero. La casilla de cor
 
 La sesión de administración usa cookie HttpOnly, SameSite Strict y Secure en producción, con firma del servidor. Las operaciones de escritura verifican el origen. El login y las consultas públicas tienen límites de intentos persistentes en PostgreSQL; si la base falla, el acceso no omite esa protección.
 
-El cliente consulta con su número y el antispam; no existe una clave adicional de seguimiento. Los nuevos números incorporan 24 caracteres hexadecimales aleatorios (96 bits). Quien tenga el número puede consultar los mensajes públicos y escribir en esa solicitud: comparte únicamente información apropiada para ese canal. Los enlaces transportan solo el número en el fragmento `#pedido=...` y la página limpia el fragmento al cargar. Las notas internas y los datos de contacto permanecen en administración.
+El cliente consulta el estado con su número y el antispam. Para abrir o responder la conversación de una referencia corta, debe confirmar el correo o teléfono completo de su solicitud. Este dato viaja por POST, no se devuelve en la respuesta ni se guarda en localStorage, sessionStorage o historial. Las comprobaciones de contacto tienen límites persistentes por solicitud e IP. No se crea ni se pide una clave adicional de seguimiento. Las referencias largas de la versión anterior mantienen su comportamiento compatible. Las notas internas y los datos de contacto permanecen en administración.
 
 Las referencias anteriores con un sufijo de 8 caracteres permiten ver el estado y las fechas, pero no publican sus conversaciones previas ni permiten escribir en ellas. El historial completo sigue disponible para el administrador. El cliente puede continuar por contacto o WhatsApp.
 
@@ -83,3 +83,13 @@ Pruebas automatizadas de autenticación, expiración/revocación, cookies, orige
 ## Si aparece «pendiente de configuración»
 
 Abre `/admin` en el dominio de producción del proyecto donde guardaste las variables (el que aparece en Vercel → Domains, seguido de `/admin`). El mensaje de acceso enumera únicamente las variables faltantes o inválidas, sin mostrar sus valores. Se comprueban `PORTAL_ENABLED=true`, URL HTTPS de Supabase sin rutas adicionales, clave `service_role`, contraseña de 12 a 1024 caracteres y clave interna de sesión de al menos 32 caracteres. Corrige solo las variables indicadas para Production y vuelve a desplegar. Si sigues viendo el texto genérico anterior, espera al despliegue del último commit de main y recarga la página.
+
+## Numeración JC-0001, JC-0002…
+
+Para activar el contador en una base existente, ejecuta todo [database/portal-sequential-numbers.sql](../database/portal-sequential-numbers.sql) en Supabase → SQL Editor → Run. En instalaciones nuevas, `portal.sql` ya incluye esa configuración. No hacen falta variables ni contraseñas nuevas.
+
+El contador de PostgreSQL es compartido por pedidos y tickets nuevos. Empieza en 1, muestra un mínimo de cuatro dígitos y crece según hace falta: JC-0001, JC-0002, JC-9999, JC-10000… hasta ocho dígitos. No se reinicia al desplegar ni al repetir el SQL, y no reutiliza números después de fallos; por eso puede haber saltos. Las solicitudes anteriores conservan sus referencias y sus enlaces siguen funcionando.
+
+La referencia interna se guarda con ocho dígitos para respetar las restricciones de las tablas existentes; la web, correos y WhatsApp usan la versión corta. La función asigna el contador en una transacción, conserva el número al reintentar el mismo envío y salta cualquier referencia ya existente. Solo el servidor con `service_role` puede solicitar numeración.
+
+Hasta que se ejecute el SQL, el backend mantiene la recepción actual con las referencias largas. Después utiliza el contador automáticamente, sin cambios adicionales en Vercel. La página pública muestra el estado por número; la conversación de los códigos cortos requiere confirmar un dato de contacto existente.

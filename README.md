@@ -79,3 +79,11 @@ El inicio muestra nueve servicios destacados con acceso al catálogo completo. E
 - El checkout permite solicitar el crédito mediante una casilla. El saldo es estimado, se calcula después del descuento promocional y no es comprobante de pago. La agencia debe verificar el pago de asesoría y registrar su aplicación en la propuesta para evitar usar el crédito más de una vez. Sin base de datos de pagos ni verificación bancaria, la web no afirma haber verificado el abono.
 - La asesoría se solicita por correo a ventas@jeycee.shop; no se inventan duración, agenda ni cita confirmada.
 - Pruebas: `node --test tests/*.test.js` comprueba el límite temporal en Panamá, precios, centavos y crédito posterior al descuento.
+
+## Página de contacto
+
+El botón principal del menú dice **Contáctanos** y abre `/contacto`. La página permite preparar consultas de cotización, asesoramiento, soporte, facturación y otros temas. Las solicitudes comerciales se dirigen a ventas@jeycee.shop y las de soporte/facturación/general a hello@jeycee.shop. Admite `?tipo=soporte` o `?tipo=cotizacion&servicio=desarrollo-web` para preseleccionar opciones válidas.
+
+`src/contact.js` construye una referencia de borrador por sesión de página, el resumen descargable y el mailto. La referencia no acredita recepción ni crea un ticket en servidor. Solo el usuario puede confirmar el envío desde su aplicación de correo. La web no cambia el estado a recibido o enviado al pulsar el enlace. Puede copiarse o descargarse el resumen si no hay aplicación configurada. Editar el formulario invalida el resumen anterior; la referencia se conserva hasta recargar.
+
+No hay almacenamiento de consultas, seguimiento de estados ni correo automático. No se guardan datos personales del contacto en localStorage. Un sistema de tickets real requiere un backend, recepción de correo y autenticación para consultar estados; esa integración no se simula. Los formularios existentes de soporte y checkout se mantienen.

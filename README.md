@@ -97,3 +97,9 @@ El menú y el pie de página usan únicamente Contáctanos como acceso a consult
 Configuración central: `src/email-routing.js`. Cotización y asesoría → business@jeycee.shop; marketing y campañas → mercadeo@jeycee.shop; pedidos, pagos y facturación (incluido checkout) → orders@jeycee.shop; soporte → support@jeycee.shop; atención VIP y botones de planes VIP → vip@jeycee.shop; colaboraciones → collabs@jeycee.shop; empleo → rrhh@jeycee.shop; gerencia → gerencia@jeycee.shop; general y privacidad → hello@jeycee.shop. Los correos personales angeline y julian quedan fuera de los formularios públicos. Se retiró el alias anterior de ventas de los destinatarios de la web.
 
 La web prepara el destinatario y un asunto con área/referencia. No envía automáticamente ni confirma recepción. Los alias fueron proporcionados por el propietario; no se probó entrega real ni se modificó Namecheap. Si pertenecen al buzón hello, normalmente se recibirán en esa misma bandeja. Las reglas de carpetas o buzones independientes se configuran en el proveedor; la web no los crea.
+
+## Trabaja con nosotros
+
+El inicio incluye, al final, las tarjetas de Asistente de mercadeo y Telemarketing. El pie enlaza a `/trabaja-con-nosotros`, con ambas vacantes, funciones, requisitos, estándares de excelencia y proceso de postulación. Datos y plantillas en `src/careers.js`. Las cinco estrellas representan un objetivo de atención, no testimonios o puntuación de clientes.
+
+Cada botón abre un correo a rrhh@jeycee.shop con `[EMPLEO]` y el nombre del cargo en el asunto. El candidato debe adjuntar su CV y confirmar el envío desde su correo. No hay carga de CV en servidor ni confirmación automática de recepción, entrevista o contratación. Modalidad, horario y remuneración no se inventan; deben confirmarse con RRHH.

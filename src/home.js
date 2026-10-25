@@ -1,3 +1,4 @@
+import {careersSection} from './careers.js';
 import {promotionActive,promotion} from './offers.js';
 import {advisoryCard} from './commercial.js';
 import {contactUrl,services} from './catalog.js';
@@ -23,4 +24,5 @@ ${advisoryCard()}
 <section class="section home-plans" id="planes"><div class="section-heading"><span class="eyebrow">INVERSIÓN / SIN ADIVINAR</span><h2>Elige el nivel.<br/><span class="muted">Hagamos que cuente.</span></h2><p>Planes con precios y periodo de cobro definidos.<br/>Business para proyectos a medida.</p></div>${planCards()}${note}<div class="section-end-link"><span>Los valores «desde» son mínimos por nivel; el servicio indica si se cobra por proyecto o por mes.</span><a class="text-link" href="/planes">Ver precios de todos los servicios ↗</a></div></section>
 <section class="section home-questions"><div><span class="eyebrow">ANTES DEL PRIMER HOLA</span><h2>Hablemos<br/><em>con claridad.</em></h2><p>Elegir una agencia también es saber cómo vas a trabajar con ella. Estas son algunas respuestas para empezar.</p><a class="text-link" href="/preguntas-frecuentes">Todas las preguntas ↗</a></div><div class="home-faq">${faq()}</div></section>
 <section class="home-invite"><div><span class="eyebrow">CADA PROYECTO EMPIEZA CON UNA CONVERSACIÓN</span><h2>Tu siguiente gran paso<br/>merece un buen <em>equipo.</em></h2></div><a class="button light" href="${contactUrl()}">Escríbenos a ventas ↗</a></section>
-${contact}`;}
+${contact}
+${careersSection()}`;}

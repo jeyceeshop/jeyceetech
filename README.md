@@ -18,7 +18,7 @@ npm run build
 npm run preview -- --port 4173
 ```
 
-Publicar `dist/` en un alojamiento estático. La navegación, menú móvil, 21 páginas de servicios y descarga de brief funcionan sin servicios externos. Contáctanos envía directamente mediante la función SMTP de Vercel, sujeta a configurar las credenciales. El checkout conserva el resumen descargable y correo manual.
+Publicar `dist/` en un alojamiento estático. La navegación, menú móvil, 21 páginas de servicios y descarga de brief funcionan sin servicios externos. Contáctanos envía directamente mediante la función SMTP de Vercel, sujeta a configurar las credenciales. El brief del checkout abre una solicitud por WhatsApp con mensaje preparado.
 
 El símbolo SVG es una recreación vectorial de la referencia aportada; reemplazar `public/mark.svg` por el archivo oficial cuando esté disponible. Imagen de portada original generada para este diseño. No se incluyen reseñas, cifras ni clientes inventados. Las fuentes de Google son opcionales y tienen alternativas locales.
 
@@ -35,7 +35,7 @@ La navegación principal contiene Quiénes somos, Servicios (mega menú), Planes
 
 ## Contacto y Yappy
 
-Ventas y cotizaciones: `business@jeycee.shop`. Soporte: `support@jeycee.shop`. Privacidad y contacto general: `hello@jeycee.shop`. Yappy: `6827-4965`. Contáctanos utiliza la función SMTP de Vercel cuando está configurada. El checkout y las postulaciones conservan sus enlaces de correo manuales. No se crea una base de datos de tickets. El flujo Yappy es manual: confirmar beneficiario, alcance y monto final antes de transferir; la agencia verifica el pago. No hay integración comercial/API de Yappy, lectura bancaria, captura de tarjetas ni emisión fiscal.
+Ventas y cotizaciones: `business@jeycee.shop`. Soporte: `support@jeycee.shop`. Privacidad y contacto general: `hello@jeycee.shop`. Yappy: `6827-4965`. Contáctanos utiliza la función SMTP de Vercel cuando está configurada. El brief del checkout abre WhatsApp; las postulaciones conservan sus enlaces de correo manuales. No se crea una base de datos de tickets. El flujo Yappy es manual: confirmar beneficiario, alcance y monto final antes de transferir; la agencia verifica el pago. No hay integración comercial/API de Yappy, lectura bancaria, captura de tarjetas ni emisión fiscal.
 
 ## Reseñas compartidas (integración pendiente de credenciales)
 
@@ -107,7 +107,7 @@ El menú y el pie de página usan únicamente Contáctanos como acceso a consult
 
 ## Distribución de alias de correo
 
-Configuración central: `src/email-routing.js`. Cotización y asesoría → business@jeycee.shop; marketing y campañas → mercadeo@jeycee.shop; pedidos, pagos y facturación (incluido checkout) → orders@jeycee.shop; soporte → support@jeycee.shop; atención VIP y botones de planes VIP → vip@jeycee.shop; colaboraciones → collabs@jeycee.shop; empleo → rrhh@jeycee.shop; gerencia → gerencia@jeycee.shop; general y privacidad → hello@jeycee.shop. Los correos personales angeline y julian quedan fuera de los formularios públicos. Se retiró el alias anterior de ventas de los destinatarios de la web.
+Configuración central: `src/email-routing.js`. Cotización y asesoría → business@jeycee.shop; marketing y campañas → mercadeo@jeycee.shop; pedidos, pagos y facturación (desde Contáctanos) → orders@jeycee.shop; soporte → support@jeycee.shop; atención VIP y botones de planes VIP → vip@jeycee.shop; colaboraciones → collabs@jeycee.shop; empleo → rrhh@jeycee.shop; gerencia → gerencia@jeycee.shop; general y privacidad → hello@jeycee.shop. Los correos personales angeline y julian quedan fuera de los formularios públicos. Se retiró el alias anterior de ventas de los destinatarios de la web.
 
 Contáctanos envía por SMTP al destinatario según el área cuando está configurado; el checkout y las postulaciones conservan sus enlaces de correo manuales. La aceptación por SMTP no equivale a confirmación de lectura. Los alias fueron proporcionados por el propietario; no se probó entrega real ni se modificó Namecheap. Si pertenecen al buzón hello, normalmente se recibirán en esa misma bandeja. Las reglas de carpetas o buzones independientes se configuran en el proveedor; la web no los crea.
 
@@ -145,4 +145,12 @@ Las variables que se añaden en Vercel necesitan un nuevo despliegue para estar 
 
 El logotipo se incorpora como PNG inline mediante CID desde `server/email-logo.js` (render del símbolo SVG existente), sin descargar imágenes externas. No se añaden píxeles de seguimiento ni hojas de estilo externas. Todas las entradas del usuario se escapan antes de insertarse en HTML; los saltos de línea se conservan. El correo también incluye una alternativa de texto para clientes que no muestran HTML.
 
-Las pruebas generan MIME sin envío real, comprueban alternativas HTML/texto, imagen CID, caracteres escapados y Reply-To. La maquetación usa tablas para compatibilidad; la apariencia puede variar según el cliente de correo. Solo cambia el correo automático de Contáctanos; los flujos manuales de checkout y postulaciones no cambian.
+Las pruebas generan MIME sin envío real, comprueban alternativas HTML/texto, imagen CID, caracteres escapados y Reply-To. La maquetación usa tablas para compatibilidad; la apariencia puede variar según el cliente de correo. Solo cambia el correo automático de Contáctanos; el brief del checkout usa WhatsApp y las postulaciones conservan su envío por correo.
+
+## Planes y brief por WhatsApp
+
+Cada tarjeta de plan muestra primero **Preparar un brief**, con enlace a `/checkout?plan=<servicio>--<nivel>`, y debajo **Cotizar por WhatsApp**. Las tarjetas generales enlazan a `/checkout?nivel=<nivel>` sin asumir un servicio. Los 84 planes conservan alcance y precio. Los botones de cotización de planes, resumen y tabla Business abren el número oficial **+507 6091-3544** mediante `https://wa.me/50760913544` con un texto contextual; no se dirigen por correo.
+
+`src/whatsapp.js` centraliza el número, mensajes y aviso de privacidad/pagos. `src/brief.js` valida y prepara un brief con servicio, nivel, precio vigente, crédito de asesoría solicitado (por verificar), contacto básico y objetivo del proyecto. Tras el antispam, **Solicitar por WhatsApp** abre una ventana con el mensaje; queda un botón visible por si el navegador bloquea la apertura. El cliente confirma el envío en WhatsApp. No hay WhatsApp Business API, envío automático, orden confirmada ni pago verificado. El estado se invalida al editar el formulario.
+
+El brief solicita nombre y objetivo; correo y empresa son opcionales. Se retiraron los campos fiscales y bancarios de ese flujo para no enviarlos a WhatsApp. Si se requieren datos fiscales se coordinan por un canal oficial. El aviso indica no compartir datos confidenciales y que el **único medio de pago es Yappy** (6827-4965), coordinado por el WhatsApp oficial o correos de dominio exacto **@jeycee.shop**. WhatsApp (6091-3544) y Yappy (6827-4965) son números distintos con funciones distintas. El formulario de Contáctanos sigue enviando por SMTP con su diseño HTML y no cambia de destinatarios.

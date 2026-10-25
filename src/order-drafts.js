@@ -8,7 +8,7 @@ export function saveOrderNumber(order,storage){
   const stored=JSON.parse(storage.getItem(storageKey)||'[]');
   const previous=Array.isArray(stored)?stored.filter(o=>o&&typeof o.number==='string'&&typeof o.productKey==='string'):[];
   // Deliberately retain only order metadata, never name, email, company or brief.
-  const record={number:order.number,productKey:order.productKey,createdAt:order.createdAt,price:order.price,coupon:order.coupon||'',status:'pending-whatsapp'};
+  const record={number:order.number,productKey:order.productKey,createdAt:order.createdAt,price:order.price,coupon:order.coupon||'',status:order.created===true?'emailed-pending-confirmation':'pending-whatsapp'};
   storage.setItem(storageKey,JSON.stringify([record,...previous.filter(o=>o.number!==order.number)].slice(0,20)));return true;
  }catch{return false;}
 }

@@ -5,7 +5,7 @@ export function buildContactEmail(fields,reference,{now=new Date(),kind='contact
  const date=new Intl.DateTimeFormat('es-PA',{timeZone:'America/Panama',day:'2-digit',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:false}).format(now);
  const emailLink='mailto:'+encodeURIComponent(fields.email);
  const replyLink=emailLink+'?subject='+encodeURIComponent(`Re: [${reference}] ${fields.topic.title} — Jey Cee`);
- const rows=[['Nombre',fields.name],['Correo',fields.email||'No indicado'],['Empresa',fields.company||'No indicada'],['Servicio de interés',fields.service],['Referencia del proyecto',fields.projectRef||'No indicada']];
+ const rows=[['Nombre',fields.name],['Correo',fields.email||'No indicado'],...(fields.phone?[['Teléfono de contacto',fields.phone]]:[]),['Empresa',fields.company||'No indicada'],['Servicio de interés',fields.service],['Referencia del proyecto',fields.projectRef||'No indicada']];
  const html=`<!doctype html>
 <html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><title>${isOrder?'Nuevo pedido':'Nueva consulta'} · Jey Cee</title></head>
 <body style="margin:0;padding:0;background-color:#eee7e0;font-family:Arial,Helvetica,sans-serif;color:#33251b;-webkit-text-size-adjust:100%;">

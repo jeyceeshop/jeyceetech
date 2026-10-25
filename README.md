@@ -109,3 +109,11 @@ Cada botón abre un correo a rrhh@jeycee.shop con `[EMPLEO]` y el nombre del car
 La homepage se concentra en portada, Desarrollo web y Diseño gráfico destacados, tres familias de servicios, resumen de cotización/asesoría y enlace a Contáctanos. El contenido ampliado de manifiesto, orientación por etapa, criterios de trabajo y proceso se conserva en `src/studio-sections.js`, mostrado en Quiénes somos. Planes, FAQ, formulario de contacto y todos los servicios continúan en sus páginas respectivas. El enlace de asesoría del pie mantiene su ancla en el inicio.
 
 Trabaja con nosotros se accede únicamente desde el pie de página; las dos vacantes y sus requisitos se mantienen en `/trabaja-con-nosotros`. La homepage no presenta tarjetas de vacantes.
+
+## Antispam sin seguimiento externo
+
+Todos los formularios activos de contacto, checkout y reseñas incluyen una pregunta aleatoria de suma/resta y un campo honeypot oculto, excluido del recorrido de teclado. La pregunta puede renovarse y su texto es accesible para lectores de pantalla. Las respuestas no se guardan en cookies, no se incorporan al correo y no se envían a proveedores de CAPTCHA. El guard de captura bloquea la preparación de solicitudes/reseñas con respuesta incorrecta o honeypot rellenado.
+
+En las reseñas públicas, `/api/reviews` entrega además una pregunta firmada por el servidor (HMAC con separación de propósito, usando la credencial de servidor existente, sin exponerla). La función valida respuesta, firma, honeypot y caducidad de diez minutos antes de escribir en Supabase. Los tokens aceptados no pueden reutilizarse en la misma instancia de la función; ese registro es temporal, no una protección distribuida entre todas las instancias. No se requieren secretos adicionales. Se renueva la pregunta tras cada intento enviado al servidor. Sin Supabase configurado, el modo local de reseñas mantiene la validación del navegador.
+
+Esta barrera matemática es básica y no garantiza bloquear bots capaces de resolverla. Los formularios mailto pueden eludirse desde un cliente modificado y no protegen las direcciones de correo frente al spam enviado directamente. Las reseñas siguen sujetas a moderación; para abuso a gran escala se necesita limitar solicitudes en Vercel o implementar protección distribuida. No se ha habilitado correo automático con este cambio.

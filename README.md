@@ -164,3 +164,9 @@ Se guardan como máximo 20 referencias en localStorage, con número, clave del s
 Se retiró la casilla de asesoría pagada y el crédito automático de este flujo. La política comercial de asesoría de $20 se mantiene en sus secciones, para confirmar directamente con la agencia.
 
 El apartado de cupón está preparado. El propietario indicó que **por ahora no hay ninguno**: `activeCoupons` en `src/coupons.js` está vacío y el campo/botón permanecen deshabilitados con ese aviso. Cuando se definan códigos, se habilitan desde esa configuración. Se admiten descuentos de porcentaje o importe, vigencia y alcance por servicio/nivel. Por defecto no se acumulan con una promoción: se conserva el mejor precio; solo una regla con stackWithPromotion permite aplicarlo sobre la promoción. Business incluye la referencia para revisar su importe en propuesta. Los descuentos son estimaciones del navegador y requieren confirmación de la agencia, no validación de pago ni garantía de uso único.
+
+## Pantalla final del pedido
+
+Después de validar y crear el pedido, todo el contenido del checkout (intro, aviso, formulario y resumen) se sustituye por tres elementos: **Pedido creado**, número y **Seguir pedido en WhatsApp**. El botón abre WhatsApp con el mensaje completo; no se abre una ventana automáticamente al crear. Para otro pedido se vuelve al catálogo y se elige de nuevo un servicio/plan.
+
+La confirmación conserva únicamente número, clave de producto y query de origen en el estado del historial de esa página (sin datos personales). Recargar mantiene la pantalla final, sin reabrir el formulario. Tras recargar, el enlace de WhatsApp usa número y servicio para continuar la consulta; no recupera el brief personal, que no se almacena. La creación sigue siendo local, pendiente de enviar y de confirmar por la agencia. La confirmación no contiene estados de pago/recepción inventados.

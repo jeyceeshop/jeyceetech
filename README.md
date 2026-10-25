@@ -35,7 +35,7 @@ La navegación principal contiene Quiénes somos, Servicios (mega menú), Planes
 
 ## Contacto y Yappy
 
-Ventas y cotizaciones: `business@jeycee.shop`. Soporte: `support@jeycee.shop`. Privacidad y contacto general: `hello@jeycee.shop`. Yappy: `6827-4965`. Contáctanos utiliza la función SMTP de Vercel cuando está configurada. El brief del checkout abre WhatsApp; las postulaciones conservan sus enlaces de correo manuales. No se crea una base de datos de tickets. El flujo Yappy es manual: confirmar beneficiario, alcance y monto final antes de transferir; la agencia verifica el pago. No hay integración comercial/API de Yappy, lectura bancaria, captura de tarjetas ni emisión fiscal.
+Ventas y cotizaciones: `business@jeycee.shop`. Soporte: `support@jeycee.shop`. Privacidad y contacto general: `hello@jeycee.shop`. Yappy: `6827-4965`. Contáctanos utiliza la función SMTP de Vercel cuando está configurada. El brief del checkout abre WhatsApp; las postulaciones conservan sus enlaces de correo manuales. Con `PORTAL_ENABLED=true`, pedidos y tickets se registran en Supabase siguiendo la guía del portal al final de este documento; en modo correo no se crea un registro central. El flujo Yappy es manual: confirmar beneficiario, alcance y monto final antes de transferir; la agencia verifica el pago. No hay integración comercial/API de Yappy, lectura bancaria, captura de tarjetas ni emisión fiscal.
 
 ## Reseñas compartidas (integración pendiente de credenciales)
 
@@ -84,7 +84,7 @@ El inicio muestra nueve servicios destacados con acceso al catálogo completo. E
 
 El botón principal abre `/contacto`. «¿Cómo podemos ayudarte?» es un desplegable con diez áreas; admite `?tipo=soporte&servicio=desarrollo-web` para preselección. Al pulsar Enviar mensaje, se validan campos y antispam y se realiza un POST a `/api/contact`. No se genera un borrador para reenviar ni se abre el correo del cliente.
 
-La función de Vercel usa SMTP con Nodemailer y TLS verificado. Asigna una referencia y usa únicamente destinatarios permitidos por el área. El remitente es el buzón autenticado y Reply-To es el cliente. Solo devuelve `sent: true` cuando SMTP acepta el destinatario; un error conserva los datos en pantalla y no muestra éxito. No hay base de datos de tickets, seguimiento de estados ni correo de confirmación adicional al visitante.
+La función de Vercel usa SMTP con Nodemailer y TLS verificado. Asigna una referencia y usa únicamente destinatarios permitidos por el área. El remitente es el buzón autenticado y Reply-To es el cliente. En modo correo solo devuelve `sent: true` cuando SMTP acepta el destinatario; un error conserva los datos en pantalla y no muestra éxito. En modo correo no hay base de datos de tickets ni seguimiento de estados. El portal activado añade almacenamiento, seguimiento privado y un intento de confirmación al visitante; en ese modo la respuesta exitosa indica que el registro quedó guardado, aunque SMTP falle.
 
 ### Configuración obligatoria en Vercel
 
@@ -159,7 +159,7 @@ El brief solicita nombre y objetivo; correo y empresa son opcionales. Se retirar
 
 Al solicitar por WhatsApp se muestra **Pedido creado** y un número `JC-AAAAMMDD-XXXXXXXX` (fecha de Panamá y sufijo aleatorio). El mismo número se incluye en el texto de WhatsApp. La interfaz aclara que se creó en el dispositivo y sigue pendiente de enviar/confirmar por la agencia; no acredita recepción, contrato ni pago. Repetir la solicitud sin cambiar el contenido conserva el número durante la sesión. Una nueva combinación de datos/plan genera otro número.
 
-Se guardan como máximo 20 referencias en localStorage, con número, clave del servicio, fecha, precio estimado y cupón; nunca nombre, correo, empresa ni brief. Al recargar se informa la última referencia. Si el almacenamiento está bloqueado, se conserva la solicitud en memoria y se avisa al cliente para que copie el número. No existe un registro central de pedidos ni estado sincronizado con WhatsApp.
+Se guardan como máximo 20 referencias en localStorage, con número, clave del servicio, fecha, precio estimado y cupón; nunca nombre, correo, empresa ni brief. Al recargar se informa la última referencia. Si el almacenamiento está bloqueado, se conserva la solicitud en memoria y se avisa al cliente para que copie el número. El portal activado añade registro central en Supabase y estados manuales. WhatsApp no sincroniza estados automáticamente. Sin el portal, las referencias siguen siendo metadatos locales de la notificación por correo.
 
 Se retiró la casilla de asesoría pagada y el crédito automático de este flujo. La política comercial de asesoría de $20 se mantiene en sus secciones, para confirmar directamente con la agencia.
 
@@ -167,7 +167,7 @@ La campaña autorizada **JEYCEE10** activa un 10% sobre el precio regular del se
 
 ## Pantalla final del pedido
 
-Después de validar y crear el pedido, todo el contenido del checkout (intro, aviso, formulario y resumen) se sustituye por tres elementos: **Pedido creado**, número y **Seguir pedido en WhatsApp**. El botón abre WhatsApp con el mensaje completo; no se abre una ventana automáticamente al crear. Para otro pedido se vuelve al catálogo y se elige de nuevo un servicio/plan.
+En modo correo, después de validar y crear el pedido, todo el contenido del checkout (intro, aviso, formulario y resumen) se sustituye por tres elementos: **Pedido creado**, número y **Seguir pedido en WhatsApp**. El botón abre WhatsApp con el mensaje completo; no se abre una ventana automáticamente al crear. Para otro pedido se vuelve al catálogo y se elige de nuevo un servicio/plan.
 
 La confirmación conserva únicamente número, clave de producto y query de origen en el estado del historial de esa página (sin datos personales). Recargar mantiene la pantalla final, sin reabrir el formulario. Tras recargar, el enlace de WhatsApp usa número y servicio para continuar la consulta; no recupera el brief personal, que no se almacena. Los pedidos nuevos se envían a business@jeycee.shop mediante la API descrita a continuación. La confirmación no acredita lectura, contratación ni pago.
 
@@ -175,7 +175,7 @@ La confirmación conserva únicamente número, clave de producto y query de orig
 
 La creación de pedidos ahora requiere POST `/api/orders`: valida datos, consentimiento, precio/cupón desde el catálogo del servidor y antispam firmado con contexto separado. GET entrega la pregunta firmada. Usa las mismas variables SMTP que Contáctanos; no requiere configuración nueva. El destinatario está fijo en business@jeycee.shop y no puede reemplazarse mediante campos del navegador. La notificación reutiliza la plantilla HTML, imagen CID y alternativa de texto, con número, servicio, plan, importe y brief; Reply-To se añade solo si el cliente indicó correo.
 
-El número se asigna en el servidor y solo se devuelve `created: true` si SMTP acepta business@jeycee.shop. Después la web conserva la confirmación mínima de tres elementos y el enlace a WhatsApp con ese mismo número. Si SMTP falla, se conserva el formulario, se informa del fallo y se renueva la pregunta; no se muestra Pedido creado. El botón se bloquea durante el envío para evitar doble clic. La entrega SMTP no confirma lectura, contratación ni pago. No se añadió una base de datos de pedidos ni seguimiento central; la notificación queda en el buzón.
+En modo correo, el número se asigna en el servidor y solo se devuelve `created: true` si SMTP acepta business@jeycee.shop. Después la web conserva la confirmación mínima de tres elementos y el enlace a WhatsApp con ese mismo número. Si SMTP falla, se conserva el formulario, se informa del fallo y se renueva la pregunta; no se muestra Pedido creado. El botón se bloquea durante el envío para evitar doble clic. La entrega SMTP no confirma lectura, contratación ni pago. Sin el portal, la notificación queda en el buzón. Con el portal activado, la escritura en Supabase confirma la creación, el correo es una notificación adicional y se entrega también la clave/enlace de seguimiento privado.
 
 La creación anterior solo local queda obsoleta para pedidos nuevos. Los metadatos locales continúan sin datos personales. Las confirmaciones antiguas conservadas en el historial no se envían por correo retroactivamente, ni la recarga de una confirmación vuelve a enviar. Las pruebas usan SMTP simulado; las credenciales de producción no están disponibles en esta sesión para enviar una prueba real.
 
@@ -186,3 +186,9 @@ El brief requiere código de país (prefijo internacional con +; Panamá +507 po
 La homepage incorpora un Brand Lab: al tocar Estrategia, Diseño y Tecnología, las tres piezas del símbolo de Jey Cee se ensamblan y revelan JEYCEE10. Botones nativos con estado, progreso y avisos accesibles; admite teclado y movimiento reducido. El cupón se puede copiar (con selección manual si falla el portapapeles) o aplicar desde el enlace al checkout. Se conserva solo el código en sessionStorage de la pestaña: no hay registro, cookies ni datos personales. Si el almacenamiento está bloqueado, el enlace con `?cupon=JEYCEE10` sigue funcionando.
 
 Código público, reutilizable y sin fecha de caducidad configurada; no hay sorteo ni comprobación de uso único. Aplica 10% al precio regular, conservando la mejor promoción sin acumular descuentos. En planes mensuales aplica al primer periodo; en Business se incluye para calcular en propuesta. Excluye asesoría, impuestos y terceros. El servidor valida el código y recalcula el precio antes de remitir el pedido a business@jeycee.shop; el correo y WhatsApp conservan la referencia y el importe.
+
+## Administración, tickets y seguimiento
+
+Nuevas rutas: `/admin` (contraseña y sesión de servidor), `/admin/demo` (ejemplo aislado con datos ficticios) y `/seguimiento` (número + clave privada). El menú incluye Seguimiento. El portal permite consultar pedidos/tickets, responder, escribir notas internas, cambiar estados, asignar responsables y establecer fechas objetivo.
+
+Para activar el almacenamiento real ejecuta `database/portal.sql` y configura los secretos de Vercel siguiendo [la guía completa](docs/portal-administracion.md). El código no contiene una contraseña predeterminada ni credenciales de producción. Mientras `PORTAL_ENABLED` esté desactivado, se conserva el envío por correo existente. Al activarlo, las nuevas solicitudes se guardan en Supabase; la confirmación depende de esa escritura y las notificaciones por correo son adicionales. Los registros anteriores no se importan automáticamente.

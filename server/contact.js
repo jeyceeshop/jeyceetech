@@ -3,6 +3,8 @@ import nodemailer from 'nodemailer';
 import {randomUUID} from 'node:crypto';
 import {issueChallenge,verifyChallenge,claimChallenge} from './antispam.js';
 import {validateContact} from '../src/contact-data.js';
+import {portalEnabled,portalConfigured} from './portal-store.js';
+import {capturePortal} from './portal-intake.js';
 export function smtpConfigIssue(env=process.env){
  const user=env.SMTP_USER?.trim();
  if(!user)return 'SMTP_USER_MISSING';
@@ -16,16 +18,17 @@ export function smtpConfig(env=process.env){
  const port=Number(env.SMTP_PORT||465);if(![465,587].includes(port)||!/^\S+@\S+\.\S+$/.test(user))return null;
  return {host:env.SMTP_HOST?.trim()||'mail.privateemail.com',port,secure:port===465,requireTLS:port===587,auth:{user,pass},tls:{rejectUnauthorized:true},connectionTimeout:10000,greetingTimeout:10000,socketTimeout:20000};
 }
-export function makeContactHandler({env=process.env,transportFactory=nodemailer.createTransport}={}){return async function handler(req,res){
+export function makeContactHandler({env=process.env,transportFactory=nodemailer.createTransport,portalStore,notifier}={}){return async function handler(req,res){
  const send=(code,data)=>res.status(code).json(data);res.setHeader('Cache-Control','no-store');
  if(!['GET','POST'].includes(req.method)){res.setHeader('Allow','GET, POST');return send(405,{error:'Método no permitido.'});}
- const config=smtpConfig(env);if(!config)return send(503,{code:smtpConfigIssue(env),error:'El envío de correo aún no está disponible. Puedes escribir directamente al equipo desde los correos de contacto.'});
- const secret='contact-form:'+String(env.ANTISPAM_SECRET||env.SMTP_PASS);
+ const portal=portalEnabled(env),config=smtpConfig(env);if(portal&&!portalConfigured(env))return send(503,{error:'El portal de consultas está pendiente de configuración. Usa el contacto directo.'});if(!config&&!portal)return send(503,{code:smtpConfigIssue(env),error:'El envío de correo aún no está disponible. Puedes escribir directamente al equipo desde los correos de contacto.'});
+ const secret='contact-form:'+String(env.ANTISPAM_SECRET||env.SMTP_PASS||env.SUPABASE_SERVICE_ROLE_KEY);
  if(req.method==='GET')return send(200,{challenge:issueChallenge(secret)});
  if(!req.headers['content-type']?.includes('application/json'))return send(415,{error:'El formato de la solicitud no es válido.'});
  let body,fields;try{body=typeof req.body==='string'?JSON.parse(req.body):req.body;if(!body||body.website)throw Error('La verificación antispam no es válida.');fields=validateContact(body);}catch(error){return send(400,{error:error instanceof SyntaxError?'La solicitud no es válida.':error.message});}
  const proof=verifyChallenge(body.antispam,secret);if(!proof||!claimChallenge(proof))return send(400,{error:'La respuesta antispam es incorrecta o ha caducado. Responde la nueva pregunta e inténtalo de nuevo.'});
  const reference='JC-'+randomUUID().slice(0,8).toUpperCase();
+ if(portal){try{const saved=await capturePortal({env,req,fields,reference,kind:'ticket',submissionId:body.submissionId,proof,config,transportFactory,store:portalStore,notifier});return send(200,{sent:true,portal:true,reference:saved.entry.reference,tracking:saved.tracking});}catch(error){if(error.retryAfter)res.setHeader('Retry-After',String(error.retryAfter));return send(error.status||503,{error:error.status&&error.status!==503?error.message:'No pudimos registrar tu consulta. Conserva el formulario e inténtalo de nuevo.'});}}
  const emailContent=buildContactEmail(fields,reference);
  let transport;
  try{

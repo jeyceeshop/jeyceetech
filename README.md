@@ -68,3 +68,14 @@ Se implementó la opción de precios publicados solicitada. No hay panel adminis
 Redes sociales, SEO, publicidad digital y mantenimiento web se cobran por mes (`cadence: 'month'`). Los demás servicios son por proyecto. El periodo se muestra en las tarjetas, tablas, selección y resumen de solicitud. No existen cargos ni renovaciones automáticas. En publicidad, la tarifa es solo gestión: la pauta se paga por separado a la plataforma.
 
 El inicio muestra nueve servicios destacados con acceso al catálogo completo. El mega menú y el catálogo completo agrupan todos los servicios. El formulario de contacto y el selector de planes se generan desde el catálogo para mantenerlos sincronizados.
+
+## Promoción y asesoramiento
+
+- Desarrollo web y Diseño gráfico aparecen primero en los destacados, accesos rápidos del menú, catálogo y comparación de precios. El resto del catálogo se conserva.
+- Ambos servicios tienen un 10% de descuento sobre su importe hasta el 30 de noviembre de 2026 inclusive, hora de Panamá. El límite exclusivo es `2026-12-01T05:00:00Z`. `src/offers.js` centraliza vigencia, servicios y porcentaje. Las pantallas calculan la oferta al cargar; después del límite desaparecen las etiquetas y se muestran tarifas regulares. Business incluye la oferta en la propuesta, sin inventar un importe.
+- Precios originales y rebajados se muestran en tarjetas, planes, tabla y solicitud. El formateador conserva los centavos (ejemplo: diseño gráfico Básico USD 58.50, antes USD 65).
+- Todas las cotizaciones son gratuitas y no requieren contratar una asesoría.
+- Asesoramiento opcional: USD 20. Al adquirir un servicio, se acredita íntegramente el pago de la asesoría; no añade costo al servicio. El crédito se usa una vez por asesoría verificada; en servicios mensuales se acredita al primer periodo.
+- El checkout permite solicitar el crédito mediante una casilla. El saldo es estimado, se calcula después del descuento promocional y no es comprobante de pago. La agencia debe verificar el pago de asesoría y registrar su aplicación en la propuesta para evitar usar el crédito más de una vez. Sin base de datos de pagos ni verificación bancaria, la web no afirma haber verificado el abono.
+- La asesoría se solicita por correo a ventas@jeycee.shop; no se inventan duración, agenda ni cita confirmada.
+- Pruebas: `node --test tests/*.test.js` comprueba el límite temporal en Panamá, precios, centavos y crédito posterior al descuento.

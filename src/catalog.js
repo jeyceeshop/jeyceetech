@@ -26,3 +26,6 @@ export function contactUrl(service='',tier='') {
 export const serviceGroups=[{id:'design',name:'Diseño y marca',description:'Identidad, comunicación visual y contenido en movimiento.'},{id:'web',name:'Diseño y desarrollo web',description:'Sitios, tiendas, aplicaciones e integraciones.'},{id:'marketing',name:'Marketing y crecimiento',description:'Estrategia, canales, campañas y datos.'}];
 const groupMap={'diseno-grafico':'design','manual-de-marca':'design','packaging':'design','identidad-de-marca':'design','branding-estrategico':'design','diseno-de-interaccion':'web','productos-digitales':'web','analisis-de-datos':'marketing'};
 for(const s of services){s.group??=groupMap[s.slug];}
+
+const featuredOrder=['desarrollo-web','diseno-grafico'];
+services.sort((a,b)=>{const rank=s=>featuredOrder.includes(s.slug)?featuredOrder.indexOf(s.slug):featuredOrder.length;return rank(a)-rank(b);});

@@ -1,14 +1,14 @@
 // Tarifas comerciales de JeyCee Tech en USD, por proyecto y alcance descrito.
 // null = cotización personalizada. Edita aquí para actualizar toda la web.
 export const pricing = {
- 'diseno-grafico':       {basico:150, pro:390, vip:790, business:null},
- 'manual-de-marca':      {basico:250, pro:490, vip:890, business:null},
- 'packaging':            {basico:350, pro:790, vip:1490,business:null},
- 'identidad-de-marca':   {basico:390, pro:790, vip:1490,business:null},
- 'analisis-de-datos':    {basico:350, pro:750, vip:1490,business:null},
- 'diseno-de-interaccion':{basico:650, pro:1290,vip:2490,business:null},
- 'productos-digitales':  {basico:590, pro:1190,vip:2490,business:null},
- 'branding-estrategico': {basico:350, pro:690, vip:1290,business:null}
+ 'diseno-grafico':        {basico:65,  pro:145, vip:285, business:null},
+ 'manual-de-marca':       {basico:95,  pro:195, vip:395, business:null},
+ 'packaging':             {basico:125, pro:295, vip:575, business:null},
+ 'identidad-de-marca':    {basico:150, pro:325, vip:595, business:null},
+ 'analisis-de-datos':     {basico:110, pro:245, vip:475, business:null},
+ 'diseno-de-interaccion': {basico:225, pro:495, vip:895, business:null},
+ 'productos-digitales':   {basico:250, pro:550, vip:990, business:null},
+ 'branding-estrategico':  {basico:135, pro:275, vip:525, business:null}
 };
 export const money=value=>new Intl.NumberFormat('es-PA',{style:'currency',currency:'USD',currencyDisplay:'narrowSymbol',maximumFractionDigits:0}).format(value);
 export function priceFor(slug,tier){return pricing[slug]?.[tier]??null;}

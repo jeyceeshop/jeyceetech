@@ -189,6 +189,12 @@ La sección de referentes muestra logotipos locales de McDonald's, Nike, Apple, 
 
 El sistema de cupones por registro fue retirado: no hay formulario, campo de checkout, pestaña de administración ni envío de promociones. `/api/promotions` devuelve 410 sin acceder a la base de datos ni enviar correo. Los registros históricos de una instalación que ejecutó el SQL anterior permanecen privados en Supabase, sin borrado automático. Los pedidos anteriores conservan su metadata para no alterar su historial. Las instalaciones nuevas no crean las tablas de la campaña retirada. La base de datos no requiere cambios para retirar la campaña.
 
+## Fundador, misión y visión
+
+`/quienes-somos` incorpora la historia de Julian Cueto, dueño y fundador, nacido el 5 de noviembre de 2007, quien empezó a formar el proyecto a los 15 años y actualmente estudia Big Data y Ciencia de Datos. Estos datos fueron aportados por el titular del proyecto. La edad se calcula con la fecha de Panamá, sin dejarla fija en 18 años. La biografía no atribuye grados académicos concluidos, premios ni logros no confirmados.
+
+La sección incluye misión, visión y enlaces internos a ambas partes, conservando el resto del contenido de Quiénes somos. Texto y edad: `src/about-founder.js`; estilos: `src/about-founder.css`.
+
 ## Centro de ayuda desde la web
 
 `/soporte` permite abrir un ticket con nombre, email, código de país, teléfono, motivo y mensaje; opcionalmente se vincula un pedido. Los datos se validan en el servidor, junto con consentimiento y antispam. Reutiliza los destinatarios existentes: support@ para soporte, orders@ para pagos/facturación y hello@ para consultas generales. Al crearse muestra el número y un enlace a Seguimiento, y oculta el formulario para evitar otra solicitud accidental.

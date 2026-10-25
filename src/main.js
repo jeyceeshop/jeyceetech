@@ -1,6 +1,7 @@
 import {initBrief} from './brief.js';
 import './support.css';
 import './home-sections.css';
+import './about-founder.css';
 import './portal.css';
 import {quoteWhatsApp,officialWhatsApp} from './whatsapp.js';
 import {installAntiSpam} from './antispam.js';

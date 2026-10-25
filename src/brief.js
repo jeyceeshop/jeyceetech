@@ -2,7 +2,7 @@ import {installAntiSpam} from './antispam.js';
 import {products} from './premium.js';
 import {orderSummary} from './pages.js';
 import {briefMessage,whatsappUrl} from './whatsapp.js';
-import {couponQuote,activeCoupons} from './coupons.js';
+import {couponQuote,activeCoupons,couponSessionKey} from './coupons.js';
 import {saveOrderNumber,recentOrderNumber} from './order-drafts.js';
 import {priceLabel} from './pricing.js';
 export function initBrief(){
@@ -22,7 +22,7 @@ export function initBrief(){
  function getProduct(){return products.find(p=>p.key===select.value);}
  function update({announce=false}={}){
   const product=getProduct();let offer;
-  try{offer=couponQuote(product,couponInput.value);couponInput.removeAttribute('aria-invalid');couponStatus.textContent=offer.code?offer.pending?'Cupón incluido para revisión en la propuesta Business.':offer.applied?'Cupón aplicado. Base estimada: '+priceLabel(offer.price,product.cadence)+'. Sujeto a confirmación por la agencia.':'Tu promoción actual ya ofrece un precio igual o mejor.':activeCoupons.some(c=>c.active)?'Si tienes un cupón, aplícalo antes de solicitar.':'Por ahora no hay cupones activos. Puedes continuar sin cupón.';}
+  try{offer=couponQuote(product,couponInput.value);couponInput.removeAttribute('aria-invalid');couponStatus.textContent=offer.code?offer.pending?'Cupón incluido para revisión en la propuesta Business.':offer.applied?'Cupón aplicado. Base estimada: '+priceLabel(offer.price,product.cadence)+(product.cadence==='month'?' (primer periodo)':'')+'. Sujeto a confirmación por la agencia.':'Tu promoción actual ya ofrece un precio igual o mejor.':activeCoupons.some(c=>c.active)?'Si tienes un cupón, aplícalo antes de solicitar.':'Por ahora no hay cupones activos. Puedes continuar sin cupón.';}
   catch(error){couponInput.setAttribute('aria-invalid','true');couponStatus.textContent=error.message;document.querySelector('#order-summary').innerHTML=orderSummary(product);if(announce)couponInput.focus();return null;}
   document.querySelector('#order-summary').innerHTML=orderSummary(product,{coupon:offer});return offer;
  }
@@ -30,6 +30,14 @@ export function initBrief(){
  form.addEventListener('invalid',()=>{status.textContent='Completa los campos obligatorios y la pregunta antispam antes de solicitar tu pedido.';},true);
  form.addEventListener('input',()=>{status.textContent='';});
  couponInput.addEventListener('input',()=>{couponInput.removeAttribute('aria-invalid');couponStatus.textContent='Pulsa Aplicar cupón para validarlo.';document.querySelector('#order-summary').innerHTML=orderSummary(getProduct());});
+ // Only carry a currently authorized code; storage is optional and holds no personal data.
+ let savedCoupon=new URLSearchParams(location.search).get('cupon')||'';
+ if(!savedCoupon)try{savedCoupon=sessionStorage.getItem(couponSessionKey)||'';}catch{}
+ savedCoupon=savedCoupon.trim().toUpperCase();
+ if(activeCoupons.some(c=>c.active&&c.code===savedCoupon)){
+  couponInput.value=savedCoupon;
+  if(getProduct())update();else couponStatus.textContent=savedCoupon+' está listo. Selecciona un servicio y plan para calcular tu descuento.';
+ }
  form.addEventListener('submit',async event=>{event.preventDefault();if(busy)return;
   let data;try{data=Object.fromEntries(new FormData(form));const product=getProduct(),offer=update({announce:true});if(!offer)return;briefMessage(product,data,'por asignar',offer);}catch(error){status.textContent=error.message;return;}
   busy=true;submit.disabled=true;submit.textContent='Creando pedido…';status.textContent='Enviando tu pedido a Jey Cee…';

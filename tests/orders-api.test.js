@@ -18,3 +18,12 @@ test('mail errors never create a successful order; email remains optional',async
  for(const accepted of [false,true]){let message;const handler=makeOrdersHandler({env,transportFactory:()=>({sendMail:async mail=>{message=mail;return {accepted:accepted?['business@jeycee.shop']:[]};},close(){}})});const antispam=await proof(handler),res=response();await handler(request({...body,email:'',antispam}),res);assert.equal(res.code,accepted?200:502);if(!accepted)assert.notEqual(res.data.created,true);else{assert.equal(message.replyTo,undefined);assert.ok(message.html.includes('El cliente no indicó correo'));}}
  const missing=response();await makeOrdersHandler({env:{}})({method:'GET'},missing);assert.equal(missing.code,503);
 });
+test('JEYCEE10 is recalculated by the server and included in email and WhatsApp without stacking promotions',async()=>{
+ let message;const handler=makeOrdersHandler({env,transportFactory:()=>({sendMail:async mail=>{message=mail;return {accepted:['business@jeycee.shop']};},close(){}})});
+ for(const [product,expected] of [['redes-sociales--pro',179.1],['desarrollo-web--basico',261],['desarrollo-web--business',null]]){
+  const antispam=await proof(handler),res=response();await handler(request({...body,product,coupon:' jeycee10 ',price:1,discount:99,antispam}),res);
+  assert.equal(res.code,200);assert.equal(res.data.coupon,'JEYCEE10');assert.equal(res.data.price,expected);assert.equal(message.to,'business@jeycee.shop');assert.ok(message.html.includes('JEYCEE10'));assert.ok(message.text.includes('JEYCEE10'));
+  const text=new URL(res.data.whatsappUrl).searchParams.get('text');assert.ok(text.includes('JEYCEE10'));
+  if(product==='redes-sociales--pro'){assert.ok(text.includes('$179.10'));assert.ok(text.includes('solo para el primer periodo'));}
+ }
+});

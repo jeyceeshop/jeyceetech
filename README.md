@@ -163,7 +163,7 @@ Se guardan como máximo 20 referencias en localStorage, con número, clave del s
 
 Se retiró la casilla de asesoría pagada y el crédito automático de este flujo. La política comercial de asesoría de $20 se mantiene en sus secciones, para confirmar directamente con la agencia.
 
-El apartado de cupón está preparado. El propietario indicó que **por ahora no hay ninguno**: `activeCoupons` en `src/coupons.js` está vacío y el campo/botón permanecen deshabilitados con ese aviso. Cuando se definan códigos, se habilitan desde esa configuración. Se admiten descuentos de porcentaje o importe, vigencia y alcance por servicio/nivel. Por defecto no se acumulan con una promoción: se conserva el mejor precio; solo una regla con stackWithPromotion permite aplicarlo sobre la promoción. Business incluye la referencia para revisar su importe en propuesta. Los descuentos son estimaciones del navegador y requieren confirmación de la agencia, no validación de pago ni garantía de uso único.
+La campaña autorizada **JEYCEE10** activa un 10% sobre el precio regular del servicio desde `src/coupons.js`. El campo y botón del brief están habilitados. Se admiten descuentos de porcentaje o importe, vigencia y alcance por servicio/nivel. Por defecto no se acumulan con una promoción: se conserva el mejor precio; solo una regla con stackWithPromotion permite aplicarlo sobre la promoción. Business incluye la referencia para revisar su importe en propuesta. Los descuentos son estimaciones del navegador y requieren confirmación de la agencia, no validación de pago ni garantía de uso único.
 
 ## Pantalla final del pedido
 
@@ -180,3 +180,9 @@ El número se asigna en el servidor y solo se devuelve `created: true` si SMTP a
 La creación anterior solo local queda obsoleta para pedidos nuevos. Los metadatos locales continúan sin datos personales. Las confirmaciones antiguas conservadas en el historial no se envían por correo retroactivamente, ni la recarga de una confirmación vuelve a enviar. Las pruebas usan SMTP simulado; las credenciales de producción no están disponibles en esta sesión para enviar una prueba real.
 
 El brief requiere código de país (prefijo internacional con +; Panamá +507 por defecto) y teléfono sin repetir ese prefijo. Ambos se validan en navegador y servidor. El número normalizado se incluye en la notificación HTML/texto a business y en el mensaje preparado para WhatsApp; no se almacena en los metadatos locales del pedido.
+
+## Campaña interactiva «Conecta tu marca»
+
+La homepage incorpora un Brand Lab: al tocar Estrategia, Diseño y Tecnología, las tres piezas del símbolo de Jey Cee se ensamblan y revelan JEYCEE10. Botones nativos con estado, progreso y avisos accesibles; admite teclado y movimiento reducido. El cupón se puede copiar (con selección manual si falla el portapapeles) o aplicar desde el enlace al checkout. Se conserva solo el código en sessionStorage de la pestaña: no hay registro, cookies ni datos personales. Si el almacenamiento está bloqueado, el enlace con `?cupon=JEYCEE10` sigue funcionando.
+
+Código público, reutilizable y sin fecha de caducidad configurada; no hay sorteo ni comprobación de uso único. Aplica 10% al precio regular, conservando la mejor promoción sin acumular descuentos. En planes mensuales aplica al primer periodo; en Business se incluye para calcular en propuesta. Excluye asesoría, impuestos y terceros. El servidor valida el código y recalcula el precio antes de remitir el pedido a business@jeycee.shop; el correo y WhatsApp conservan la referencia y el importe.

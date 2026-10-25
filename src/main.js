@@ -1,4 +1,6 @@
 import {initBrief} from './brief.js';
+import {initBrandPlay} from './brand-play.js';
+import './brand-play.css';
 import {quoteWhatsApp,officialWhatsApp} from './whatsapp.js';
 import {installAntiSpam} from './antispam.js';
 import {mailboxes} from './email-routing.js';
@@ -45,6 +47,7 @@ document.querySelector('#download-brief').insertAdjacentHTML('afterend','<a clas
 const originalShow=showSummary;function present(text,email=mailboxes.business){originalShow(text);document.querySelector('#send-summary').href=mailLink((email===mailboxes.orders?'[PEDIDOS]':'[COTIZACIÓN]')+' Solicitud — Jey Cee',text,email);document.querySelector('dialog > p').textContent='Descarga el resumen o abre un correo a '+email+'. Nada se envía automáticamente.';}
 const contact=document.querySelector('#contact-form');contact?.addEventListener('submit',e=>{e.preventDefault();const d=new FormData(contact);present(`SOLICITUD PARA JEYCEE TECH\nCotización gratis, sin obligación de compra.\nNo es factura ni comprobante de pago.\n\nNombre: ${d.get('name')}\nCorreo: ${d.get('email')}\nServicio: ${d.get('service')}\n\nProyecto:\n${d.get('message')}`);});
 initBrief();
+initBrandPlay();
 const reviewForm=document.querySelector('#review-form');if(reviewForm){const key='jeycee-local-reviews-v1';let reviews=[];try{const saved=JSON.parse(localStorage.getItem(key)||'[]');if(Array.isArray(saved))reviews=saved.filter(r=>typeof r.id==='string'&&typeof r.author==='string'&&typeof r.text==='string'&&Number.isInteger(r.rating)&&r.rating>=1&&r.rating<=5).slice(0,50);}catch{}
 function paint(){const list=document.querySelector('#review-list');list.innerHTML=reviews.length?reviews.map(r=>`<article class="review-card"><span class="five-stars" aria-label="${r.rating} de 5 estrellas">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</span><p>${escape(r.text)}</p><b>${escape(r.author)}</b><small>Prueba local · no verificada</small><button class="delete-review" data-id="${escape(r.id)}">Eliminar de este dispositivo</button></article>`).join(''):'<div class="info-box"><h3>Tu experiencia puede abrir la conversación.</h3><p>Aún no hay reseñas guardadas en este navegador. No mostramos testimonios inventados.</p></div>';}
 function persist(){try{localStorage.setItem(key,JSON.stringify(reviews));return true;}catch{document.querySelector('#review-status').textContent='El navegador no permite guardar datos. No se ha guardado el cambio.';return false;}}

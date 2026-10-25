@@ -1,8 +1,8 @@
-// Cupones autorizados por la agencia. No hay códigos activos hasta que se definan.
-// Ejemplo de estructura (no activar sin autorización):
-// {code:'CODIGO',type:'percent'|'amount',value:10,active:true,
-//  expiresAt:'2026-12-01T05:00:00Z',serviceSlugs:[],tiers:[],stackWithPromotion:false}
-export const activeCoupons=[];
+// Campaña autorizada: se aplica al precio regular y conserva la mejor promoción.
+export const brandCoupon={code:'JEYCEE10',type:'percent',value:10,active:true,stackWithPromotion:false};
+export const activeCoupons=[brandCoupon];
+export const couponSessionKey='jeycee-brand-coupon';
+export const couponTerms='10% sobre el precio regular del servicio. No acumulable con otras promociones: conservamos el mejor precio. En planes mensuales, aplica al primer periodo; en Business, el importe se calcula en la propuesta. No incluye asesoramiento, impuestos ni costos de terceros.';
 export function couponQuote(product,raw='',{rules=activeCoupons,now=new Date()}={}){
  const code=String(raw).trim().toUpperCase();
  if(!code)return {code:'',discount:0,price:product?.price??null,applied:false,pending:false};

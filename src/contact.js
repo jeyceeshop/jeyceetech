@@ -10,16 +10,16 @@ export function initContact(){
  if(services.some(s=>s.slug===params.get('servicio')))form.elements.service.value=params.get('servicio');
  function destination(){const topic=contactTopics.find(t=>t.id===form.elements.topic.value);const box=document.querySelector('#request-destination');box.replaceChildren();const label=document.createElement('span');label.className='eyebrow';label.textContent='TU CONSULTA IRÁ A';const value=document.createElement('b');value.textContent=topic?.email||'Selecciona un motivo para ver el equipo destinatario.';box.append(label,value);}
  form.elements.topic.addEventListener('change',destination);destination();
- async function fetchChallenge(){const response=await fetch('/api/contact',{headers:{Accept:'application/json'}});let data;try{data=await response.json();}catch{throw Error('No pudimos conectar con el servicio de contacto. Intenta más tarde o usa los correos de contacto directo.');}if(!response.ok||!data.challenge?.token)throw Error(data.error||'No se pudo cargar la verificación antispam.');return data.challenge;}
- const guard=installAntiSpam(form,{refresh:fetchChallenge});
+ async function fetchChallenge(){const response=await fetch('/api/contact',{cache:'no-store',headers:{Accept:'application/json'}});let data;try{data=await response.json();}catch{throw Error('No pudimos conectar con el servicio de contacto. Intenta más tarde o usa los correos de contacto directo.');}if(!response.ok||!data.challenge?.token)throw Error(data.error||'No se pudo cargar la verificación antispam.');return data.challenge;}
+ let busy=false;
+ const guard=installAntiSpam(form,{refresh:fetchChallenge,requireServer:true,onStateChange:state=>{submit.disabled=busy||state!=='ready';if(state==='ready'&&!busy){status.textContent='';status.dataset.state='ready';}}});
  async function renew(){const ok=await guard.renew();if(!ok){status.textContent='El servicio de envío no está disponible en este momento. Intenta más tarde o escribe a los correos de contacto directo.';status.dataset.state='error';}return ok;}
  renew();
  function fieldError(input){input.setAttribute('aria-invalid','true');let note=document.getElementById(input.name+'-contact-error');if(!note){note=document.createElement('span');note.id=input.name+'-contact-error';note.className='field-error';note.setAttribute('role','alert');input.after(note);}note.textContent=input.validity.valueMissing?'Este campo es obligatorio.':input.type==='email'?'Introduce un correo válido.':input.name==='antispam_answer'?'Responde la pregunta antispam con un número.':'Revisa este campo (el mensaje debe tener al menos 10 caracteres).';input.setAttribute('aria-describedby',note.id);}
  form.addEventListener('invalid',e=>{fieldError(e.target);status.textContent='Revisa los campos obligatorios marcados antes de enviar.';status.dataset.state='error';},true);
- let busy=false;
  form.addEventListener('input',e=>{const input=e.target;input.removeAttribute('aria-invalid');document.getElementById(input.name+'-contact-error')?.remove();input.removeAttribute('aria-describedby');result.hidden=true;if(!busy)status.textContent='';});
  form.addEventListener('submit',async e=>{e.preventDefault();if(busy)return;result.hidden=true;
- if(!guard.payload().token){await renew();status.textContent='Revisa y responde la pregunta antispam antes de enviar. Si el servicio no está disponible, utiliza el contacto directo.';status.dataset.state='error';return;}
+ if(!guard.payload().token){await renew();status.textContent='No se ha podido cargar la verificación del servidor. Reintenta en un momento; tus datos permanecen en el formulario.';status.dataset.state='error';return;}
  busy=true;submit.disabled=true;submit.textContent='Enviando…';status.textContent='Enviando tu mensaje…';status.dataset.state='pending';
  const data=Object.fromEntries(new FormData(form));const payload={...data,privacy:form.elements.privacy.checked,antispam:guard.payload()};
  try{
@@ -27,6 +27,6 @@ export function initContact(){
   if(!response.ok||body.sent!==true||typeof body.reference!=='string')throw Error(body.error||'No pudimos enviar tu mensaje. Los datos permanecen en el formulario.');
   form.reset();destination();document.querySelector('#request-reference').textContent=body.reference;result.hidden=false;status.textContent='Mensaje enviado correctamente.';status.dataset.state='success';result.focus({preventScroll:true});result.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth',block:'start'});
  }catch(error){status.textContent=error.message;status.dataset.state='error';}
- finally{await guard.renew();busy=false;submit.disabled=false;submit.textContent='Enviar mensaje';}
+ finally{await guard.renew();busy=false;submit.disabled=!guard.ready();submit.textContent='Enviar mensaje';}
  });
 }

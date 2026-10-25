@@ -2,15 +2,23 @@ import nodemailer from 'nodemailer';
 import {randomUUID} from 'node:crypto';
 import {issueChallenge,verifyChallenge,claimChallenge} from './antispam.js';
 import {validateContact} from '../src/contact-data.js';
+export function smtpConfigIssue(env=process.env){
+ const user=env.SMTP_USER?.trim();
+ if(!user)return 'SMTP_USER_MISSING';
+ if(!env.SMTP_PASS)return 'SMTP_PASS_MISSING';
+ if(!/^\S+@\S+\.\S+$/.test(user))return 'SMTP_USER_INVALID';
+ if(![465,587].includes(Number(env.SMTP_PORT||465)))return 'SMTP_PORT_INVALID';
+ return null;
+}
 export function smtpConfig(env=process.env){
- const user=env.SMTP_USER,pass=env.SMTP_PASS;if(!user||!pass)return null;
+ const user=env.SMTP_USER?.trim(),pass=env.SMTP_PASS;if(!user||!pass)return null;
  const port=Number(env.SMTP_PORT||465);if(![465,587].includes(port)||!/^\S+@\S+\.\S+$/.test(user))return null;
- return {host:env.SMTP_HOST||'mail.privateemail.com',port,secure:port===465,requireTLS:port===587,auth:{user,pass},tls:{rejectUnauthorized:true},connectionTimeout:10000,greetingTimeout:10000,socketTimeout:20000};
+ return {host:env.SMTP_HOST?.trim()||'mail.privateemail.com',port,secure:port===465,requireTLS:port===587,auth:{user,pass},tls:{rejectUnauthorized:true},connectionTimeout:10000,greetingTimeout:10000,socketTimeout:20000};
 }
 export function makeContactHandler({env=process.env,transportFactory=nodemailer.createTransport}={}){return async function handler(req,res){
  const send=(code,data)=>res.status(code).json(data);res.setHeader('Cache-Control','no-store');
  if(!['GET','POST'].includes(req.method)){res.setHeader('Allow','GET, POST');return send(405,{error:'Método no permitido.'});}
- const config=smtpConfig(env);if(!config)return send(503,{error:'El envío de correo aún no está disponible. Puedes escribir directamente al equipo desde los correos de contacto.'});
+ const config=smtpConfig(env);if(!config)return send(503,{code:smtpConfigIssue(env),error:'El envío de correo aún no está disponible. Puedes escribir directamente al equipo desde los correos de contacto.'});
  const secret='contact-form:'+String(env.ANTISPAM_SECRET||env.SMTP_PASS);
  if(req.method==='GET')return send(200,{challenge:issueChallenge(secret)});
  if(!req.headers['content-type']?.includes('application/json'))return send(415,{error:'El formato de la solicitud no es válido.'});

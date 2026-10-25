@@ -138,3 +138,11 @@ El antispam de Contáctanos también se verifica en servidor. No requiere CAPTCH
 Contáctanos nunca muestra una pregunta local si necesita validación del servidor. Mientras carga, o si GET `/api/contact` falla, el campo de respuesta y Enviar permanecen deshabilitados y se ofrece reintentar la validación. Una respuesta correcta no se etiqueta como incorrecta por falta de configuración. Al recuperar la conexión se limpia el aviso de indisponibilidad. Las peticiones de preguntas usan `cache: no-store`.
 
 Las variables que se añaden en Vercel necesitan un nuevo despliegue para estar disponibles. GET `/api/contact` devuelve una pregunta cuando la configuración SMTP es válida; un 503 incluye un código diagnóstico sin valores secretos: SMTP_USER_MISSING, SMTP_PASS_MISSING, SMTP_USER_INVALID o SMTP_PORT_INVALID. Se toleran espacios al pegar el usuario/host; no se recorta la contraseña. La captura del usuario y su respuesta JSON confirmaron que el fallo inicial era de disponibilidad/configuración antes de validar la respuesta matemática, no que 8+5 no fuera 13. La lectura en vivo del dominio desde este entorno fue bloqueada por la política de red; falta comprobar el nuevo despliegue real.
+
+## Diseño de los correos de contacto
+
+`server/contact-email.js` genera una notificación HTML con tablas y estilos inline, marca JEY CEE, acentos naranja pastel, área, referencia, fecha/hora de Panamá, datos del contacto y mensaje. Incluye botón de respuesta y mantiene Reply-To al cliente. El servidor usa el mismo destinatario, credenciales SMTP y antispam que antes.
+
+El logotipo se incorpora como PNG inline mediante CID desde `server/email-logo.js` (render del símbolo SVG existente), sin descargar imágenes externas. No se añaden píxeles de seguimiento ni hojas de estilo externas. Todas las entradas del usuario se escapan antes de insertarse en HTML; los saltos de línea se conservan. El correo también incluye una alternativa de texto para clientes que no muestran HTML.
+
+Las pruebas generan MIME sin envío real, comprueban alternativas HTML/texto, imagen CID, caracteres escapados y Reply-To. La maquetación usa tablas para compatibilidad; la apariencia puede variar según el cliente de correo. Solo cambia el correo automático de Contáctanos; los flujos manuales de checkout y postulaciones no cambian.

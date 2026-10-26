@@ -1,6 +1,6 @@
 # JeyCee Tech
 
-Sitio en español para una agencia creativa. Vite + HTML, CSS y JavaScript, con función Vercel opcional para reseñas.
+Sitio en español para Jey Cee, agencia digital enfocada en Panamá. Vite genera HTML completo por página; las funciones de Vercel gestionan contacto, pedidos, tickets y administración.
 
 ## Desarrollo
 
@@ -18,9 +18,9 @@ npm run build
 npm run preview -- --port 4173
 ```
 
-Publicar `dist/` en un alojamiento estático. La navegación, menú móvil, 21 páginas de servicios y descarga de brief funcionan sin servicios externos. Contáctanos envía directamente mediante la función SMTP de Vercel, sujeta a configurar las credenciales. El brief del checkout abre una solicitud por WhatsApp con mensaje preparado.
+El build compila los recursos, genera 43 documentos HTML completos y audita sus metadatos, sitemap, enlaces y recursos. Publicar `dist/` en Vercel con URLs limpias; las rutas desconocidas deben devolver el 404 real. El servidor de desarrollo y Vite preview no sustituyen las funciones de Vercel. La navegación, menú móvil, 21 páginas de servicios y descarga de brief funcionan sin servicios externos. Contáctanos envía directamente mediante la función SMTP de Vercel, sujeta a configurar las credenciales. El brief del checkout abre una solicitud por WhatsApp con mensaje preparado.
 
-El símbolo SVG es una recreación vectorial de la referencia aportada; reemplazar `public/mark.svg` por el archivo oficial cuando esté disponible. Imagen de portada original generada para este diseño. No se incluyen reseñas, cifras ni clientes inventados. Las fuentes de Google son opcionales y tienen alternativas locales.
+El símbolo SVG es una recreación vectorial de la referencia aportada; reemplazar `public/mark.svg` por el archivo oficial cuando esté disponible. Imagen de portada original generada para este diseño. No se incluyen reseñas, cifras ni clientes inventados. DM Sans y Manrope se sirven localmente con sus licencias OFL y fuentes de respaldo del dispositivo. La portada usa WebP optimizado y las vistas previas sociales un JPEG de 1200 × 675.
 
 ## Catálogo y páginas
 
@@ -53,7 +53,7 @@ Los visitantes no escriben directamente en la tabla y RLS está habilitado sin a
 
 Pruebas de contrato/validación de la API (sin llamar servicios reales): `node --test tests/reviews.test.js`. La conexión real a Supabase requiere configuración y no se ha verificado sin credenciales. El servidor Vite no ejecuta funciones Vercel; el modo local sigue operativo.
 
-Vercel detecta Vite: `npm run build`, salida `dist`. `vercel.json` conserva las rutas de la aplicación y las funciones bajo `/api/`.
+Vercel detecta Vite: `npm run build`, salida `dist`. `vercel.json` utiliza `cleanUrls: true` y archivos por ruta, sin el antiguo rewrite global a index.html; las funciones siguen bajo `/api/`. El dominio canónico es https://www.jeycee.shop.
 
 ## Inicio ampliado y mantenimiento de precios
 
@@ -226,3 +226,15 @@ El seguimiento del cliente ya no solicita clave. Las referencias largas de la ve
 Ejecuta `database/portal-sequential-numbers.sql` para activar JC-0001, JC-0002… en una base existente; `database/portal.sql` ya lo incluye en instalaciones nuevas. El contador PostgreSQL persiste entre despliegues, admite hasta ocho dígitos y comparte serie entre pedidos y tickets. Reintentar un envío no consume otro número; una operación fallida puede dejar un salto. No se renumeran registros anteriores. Mientras falta esa función SQL, el servidor sigue recibiendo solicitudes con el flujo compatible actual.
 
 El estado puede verse con el número y antispam. Para acceder a la conversación de los números cortos se confirma el correo o teléfono de la solicitud; no hay una clave nueva que recordar. Los datos de contacto y las notas internas no se publican.
+
+## SEO para Panamá
+
+Implementación y pasos de Search Console: [docs/seo-panama.md](docs/seo-panama.md).
+
+- 33 URLs públicas con HTML, título y descripción propios: portada, 21 servicios, catálogo, planes, historia, contacto, FAQ, empleo y cinco rutas de recursos (índice + cuatro guías).
+- Datos estructurados de organización, servicios, preguntas visibles, artículos y rutas de navegación, sin reseñas ni ubicaciones inventadas.
+- `/sitemap.xml`, `/robots.txt`, canonical, idioma es-PA y metadatos de vistas previas. Las páginas auxiliares y privadas quedan fuera del sitemap y con noindex.
+- Preguntas específicas de cada servicio en `src/service-seo.js`; guías en `src/resources.js`; metadatos compartidos en `src/seo.js`.
+- `npm run build` genera y valida los documentos con `scripts/generate-site.mjs` y `scripts/check-seo.mjs`. `npm test` ejecuta pruebas de SEO y de las funciones existentes.
+
+La verificación de jeycee.shop y el envío del sitemap en Google Search Console requieren tu cuenta de Google y el TXT emitido para ella. El código no contiene un token inventado ni afirma que Google haya indexado o posicionado las páginas. No se requieren nuevas variables de Vercel para publicar estas mejoras.

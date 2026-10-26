@@ -1,10 +1,5 @@
 {
-  "rewrites": [
-    {
-      "source": "/((?!api/|assets/|.*\\.[^/]+$).*)",
-      "destination": "/index.html"
-    }
-  ],
+  "rewrites": [],
   "redirects": [],
   "functions": {
     "api/contact.js": {
@@ -62,6 +57,71 @@
           "value": "DENY"
         }
       ]
+    },
+    {
+      "source": "/checkout",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, follow"
+        }
+      ]
+    },
+    {
+      "source": "/soporte",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, follow"
+        }
+      ]
+    },
+    {
+      "source": "/facturacion",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, follow"
+        }
+      ]
+    },
+    {
+      "source": "/resenas",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, follow"
+        }
+      ]
+    },
+    {
+      "source": "/privacidad",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, follow"
+        }
+      ]
+    },
+    {
+      "source": "/terminos",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, follow"
+        }
+      ]
+    },
+    {
+      "source": "/404.html",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, follow"
+        }
+      ]
     }
-  ]
+  ],
+  "cleanUrls": true,
+  "trailingSlash": false
 }

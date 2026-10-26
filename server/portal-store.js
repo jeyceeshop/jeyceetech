@@ -11,7 +11,7 @@ export function portalConfigurationIssues(env){
  return issues;
 }
 export function portalConfigured(env){return portalConfigurationIssues(env).length===0;}
-export function trackingLink(env,reference){let base='https://jeycee-tech.vercel.app';for(const value of [env.PUBLIC_SITE_URL?.trim(),env.VERCEL_PROJECT_PRODUCTION_URL?'https://'+env.VERCEL_PROJECT_PRODUCTION_URL.trim():null]){try{const url=new URL(value);if(url.protocol==='https:'&&!url.username&&!url.password){base=url.origin;break;}}catch{}}return base+'/seguimiento#'+new URLSearchParams({pedido:displayReference(reference)});}
+export function trackingLink(env,reference){let base='https://www.jeycee.shop';for(const value of [env.PUBLIC_SITE_URL?.trim(),env.VERCEL_PROJECT_PRODUCTION_URL?'https://'+env.VERCEL_PROJECT_PRODUCTION_URL.trim():null]){try{const url=new URL(value);if(url.protocol==='https:'&&!url.username&&!url.password){base=url.origin;break;}}catch{}}return base+'/seguimiento#'+new URLSearchParams({pedido:displayReference(reference)});}
 export function makePortalStore(env=process.env,fetcher=fetch){
  const serviceKey=env.SUPABASE_SERVICE_ROLE_KEY.trim();
  const headers={apikey:serviceKey,Authorization:'Bearer '+serviceKey,'Content-Type':'application/json'};

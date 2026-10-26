@@ -1,5 +1,8 @@
 import {initBrief} from './brief.js';
 import './brief-fields.css';
+import './seo.css';
+import {applySeo,breadcrumbHtml} from './seo.js';
+import {navigationHtml,footerDirectoryHtml} from './site-layout.js';
 import './support.css';
 import './home-sections.css';
 import './about-founder.css';
@@ -15,17 +18,19 @@ import {promotionBanner} from './commercial.js';
 import {priceLabel} from './pricing.js';
 import {renderHome} from './home.js';
 import {renderPage,planCards,serviceCards,note,orderSummary,escape} from './pages.js';
-const banner=promotionBanner();if(banner){document.body.classList.add('has-promotion');document.querySelector('header').insertAdjacentHTML('beforebegin',banner);}
+document.querySelector('.promotion-strip')?.remove();
+const banner=promotionBanner();document.body.classList.toggle('has-promotion',!!banner);if(banner){document.body.classList.add('has-promotion');document.querySelector('header').insertAdjacentHTML('beforebegin',banner);}
 let path=location.pathname.replace(/\/+$/,'')||'/';
 
 const arrow='<svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19 19 5M5 5h14v14"/></svg>';
-const nav=document.querySelector('nav');nav.id='primary-navigation';nav.innerHTML=`<a href="/quienes-somos">Quiénes somos</a><div class="nav-services"><button id="services-toggle" aria-expanded="false" aria-controls="services-dropdown">Servicios <svg class="chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4"/></svg></button><div id="services-dropdown" class="mega-complete" hidden><div class="mega-catalog-heading"><div class="mega-priority-links"><a href="/servicios/desarrollo-web">Desarrollo web ↗</a><a href="/servicios/diseno-grafico">Diseño gráfico ↗</a></div><span class="eyebrow">${services.length} ESPECIALIDADES / UNA VISIÓN INTEGRAL</span><a class="all-services" href="/servicios">Todos los servicios ${arrow}</a></div>${serviceGroups.map(g=>`<section class="mega-group"><h3>${g.name}</h3><div class="mega-links">${services.filter(s=>s.group===g.id).map(s=>`<a href="/servicios/${s.slug}"><span><b>${s.name}</b><small>${s.short}</small></span>${arrow}</a>`).join('')}</div></section>`).join('')}</div></div><a href="/planes">Planes premium</a><a href="/seguimiento">Seguimiento</a><a href="/soporte">Ayuda y tickets</a><a href="/resenas">Reseñas</a>`;
+const nav=document.querySelector('nav');nav.id='primary-navigation';nav.innerHTML=navigationHtml();
 document.querySelectorAll('a[href="#inicio"]').forEach(a=>a.href='/');document.querySelector('.nav-contact').href='/contacto';document.querySelector('.nav-contact').firstChild.textContent='Contáctanos ';
 const main=document.querySelector('main');
-if(path!=='/'){const page=renderPage(path);main.className='inner-page section';main.innerHTML=page.html;document.title=page.title+' | JeyCee Tech';document.querySelector('meta[name=description]').content=page.title+' — JeyCee Tech. Diseño, estrategia y experiencias digitales en Panamá.';}else{
+if(path!=='/'){const page=renderPage(path);main.className='inner-page section';main.innerHTML=breadcrumbHtml(path)+page.html;}else{
  main.innerHTML=renderHome();
 }
-document.querySelector('footer').insertAdjacentHTML('afterbegin',`<div class="footer-directory"><div><span class="eyebrow">HAZ QUE TU MARCA EVOLUCIONE</span><h2>Hablemos de<br/><em>lo que viene.</em></h2><a href="mailto:business@jeycee.shop">business@jeycee.shop ↗</a><a href="${quoteWhatsApp()}" target="_blank" rel="noopener noreferrer">WhatsApp oficial: ${officialWhatsApp.display} ↗</a><p>Panamá · USD · Pagos únicamente por Yappy</p></div><div><h3>Explora</h3><a href="/servicios">Servicios</a><a href="/planes">Planes premium</a><a href="/#asesoramiento">Asesoramiento · $20 acreditables</a><a href="/resenas">Reseñas</a><a href="/quienes-somos">Quiénes somos</a><a href="/trabaja-con-nosotros">Trabaja con nosotros</a></div><div><h3>Te acompañamos</h3><a href="/seguimiento">Seguimiento de tu servicio</a><a href="/soporte">Centro de ayuda y tickets</a><a href="/admin">Administración</a><a href="/contacto">Contáctanos</a><a href="/facturacion">Facturación</a><a href="/preguntas-frecuentes">Preguntas frecuentes</a><a href="/privacidad">Privacidad</a><a href="/terminos">Condiciones</a></div></div>`);
+applySeo(path);
+if(!document.querySelector('.footer-directory'))document.querySelector('footer').insertAdjacentHTML('afterbegin',footerDirectoryHtml());
 document.querySelectorAll('form:not(#request-form):not(#checkout-form):not([data-portal-form])').forEach(form=>installAntiSpam(form));
 initContact();
 document.querySelector('#year').textContent=new Date().getFullYear();

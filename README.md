@@ -238,3 +238,5 @@ Implementación y pasos de Search Console: [docs/seo-panama.md](docs/seo-panama.
 - `npm run build` genera y valida los documentos con `scripts/generate-site.mjs` y `scripts/check-seo.mjs`. `npm test` ejecuta pruebas de SEO y de las funciones existentes.
 
 La verificación de jeycee.shop y el envío del sitemap en Google Search Console requieren tu cuenta de Google y el TXT emitido para ella. El código no contiene un token inventado ni afirma que Google haya indexado o posicionado las páginas. No se requieren nuevas variables de Vercel para publicar estas mejoras.
+
+Instagram oficial: [@jeyceeshop](https://www.instagram.com/jeyceeshop/), indicado por el titular. Se muestra en el pie y Contáctanos y se declara en los datos estructurados de la organización. Configuración en `src/social.js`; no hay widgets externos ni seguimiento añadido.

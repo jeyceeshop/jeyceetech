@@ -1,4 +1,5 @@
 import {services} from './catalog.js';
+import {officialInstagram} from './social.js';
 import {serviceSeo} from './service-seo.js';
 import {guides} from './resources.js';
 export const site={origin:'https://www.jeycee.shop',name:'Jey Cee',legalBrand:'JeyCee Tech',phone:'+507 6091-3544',email:'business@jeycee.shop',image:'/social-preview.jpg'};
@@ -46,7 +47,7 @@ export function breadcrumbHtml(path){const crumbs=breadcrumbsFor(path);if(!crumb
 export function structuredData(path){
  const meta=seoFor(path);if(meta.noindex)return null;
  const organizationId=site.origin+'/#organization',websiteId=site.origin+'/#website',pageId=meta.url+'#webpage';
- const organization={'@type':'Organization','@id':organizationId,name:site.name,alternateName:['JeyCee Tech','JeyCee','Jey Cee'],url:site.origin+'/',logo:site.origin+'/mark.svg',email:site.email,telephone:site.phone,areaServed:{'@type':'Country',name:'Panamá',identifier:'PA'},founder:{'@type':'Person',name:'Julian Cueto',url:site.origin+'/quienes-somos#fundador'},contactPoint:[{'@type':'ContactPoint',contactType:'sales',telephone:site.phone,email:site.email,availableLanguage:['es']},{'@type':'ContactPoint',contactType:'customer support',email:'support@jeycee.shop',url:site.origin+'/soporte',availableLanguage:['es']}]};
+ const organization={'@type':'Organization','@id':organizationId,name:site.name,alternateName:['JeyCee Tech','JeyCee','Jey Cee'],url:site.origin+'/',sameAs:[officialInstagram.url],logo:site.origin+'/mark.svg',email:site.email,telephone:site.phone,areaServed:{'@type':'Country',name:'Panamá',identifier:'PA'},founder:{'@type':'Person',name:'Julian Cueto',url:site.origin+'/quienes-somos#fundador'},contactPoint:[{'@type':'ContactPoint',contactType:'sales',telephone:site.phone,email:site.email,availableLanguage:['es']},{'@type':'ContactPoint',contactType:'customer support',email:'support@jeycee.shop',url:site.origin+'/soporte',availableLanguage:['es']}]};
  const page={'@type':meta.type==='Article'?'WebPage':meta.type||'WebPage','@id':pageId,url:meta.url,name:meta.guide?.title||meta.title,description:meta.description,inLanguage:'es-PA',isPartOf:{'@id':websiteId},about:{'@id':organizationId}};
  const graph=[organization,{'@type':'WebSite','@id':websiteId,name:site.name,alternateName:site.legalBrand,url:site.origin+'/',inLanguage:'es-PA',publisher:{'@id':organizationId}},page];
  const crumbs=breadcrumbsFor(path);if(crumbs.length)graph.push({'@type':'BreadcrumbList','@id':meta.url+'#breadcrumbs',itemListElement:crumbs.map((c,i)=>({'@type':'ListItem',position:i+1,name:c.name,item:site.origin+c.path}))});

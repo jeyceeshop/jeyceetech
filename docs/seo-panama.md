@@ -59,7 +59,7 @@ JSON-LD representa Organization, WebSite, WebPage, BreadcrumbList, Service, Item
 
 No se puede verificar ni enviar la propiedad sin acceso a la cuenta correspondiente. Esta implementación no afirma haber enviado URLs a Google ni disponer de cifras de tráfico.
 
-Un Perfil de Empresa en Google solo debe crearse si la actividad cumple sus requisitos de atención presencial o área de servicio; no se debe inventar una oficina. Si existe un perfil legítimo, mantén nombre, contacto y URL consistentes. El titular confirmó como único perfil oficial Instagram @jeyceeshop (https://www.instagram.com/jeyceeshop/). Se enlaza en el pie y en Contáctanos, y se declara en sameAs de Organization; no se inventan otras redes ni se incorporan embeds o píxeles. La configuración compartida está en src/social.js.
+Un Perfil de Empresa en Google solo debe crearse si la actividad cumple sus requisitos de atención presencial o área de servicio; no se debe inventar una oficina. Si existe un perfil legítimo, mantén nombre, contacto y URL consistentes. El titular confirmó como único perfil oficial Instagram @jeycee.shop (https://www.instagram.com/jeycee.shop/). Se enlaza en el pie y en Contáctanos, y se declara en sameAs de Organization; no se inventan otras redes ni se incorporan embeds o píxeles. La configuración compartida está en src/social.js.
 
 ## Continuidad editorial y marca
 

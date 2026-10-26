@@ -25,5 +25,5 @@ const xml=await readFile('dist/sitemap.xml','utf8'),urls=[...xml.matchAll(/<loc>
 for(const path of indexablePaths)assert.ok(urls.includes(site.origin+(path==='/'?'/':path)));
 for(const path of ['/admin','/admin/demo','/seguimiento','/checkout','/soporte','/resenas'])assert.ok(!urls.includes(site.origin+path));
 const robots=await readFile('dist/robots.txt','utf8');assert.ok(robots.includes('Sitemap: '+site.origin+'/sitemap.xml'));assert.ok(robots.includes('Disallow: /api/'));
-const config=JSON.parse(await readFile('vercel.json','utf8'));assert.equal(config.cleanUrls,true);assert.equal(config.trailingSlash,false);assert.deepEqual(config.rewrites,[]);
+const config=JSON.parse(await readFile('vercel.json','utf8'));assert.equal(config.cleanUrls,true);assert.equal(config.trailingSlash,false);assert.deepEqual(config.rewrites,indexablePaths.map(path=>({source:path,destination:'/api/site?route='+encodeURIComponent(path)})));
 console.log(`SEO audit passed: ${indexablePaths.length} unique indexable pages, ${staticPaths.length+1} HTML documents, valid JSON-LD, canonical URLs, local links/assets, sitemap exclusions and clean static routes.`);

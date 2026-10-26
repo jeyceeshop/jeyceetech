@@ -1,3 +1,4 @@
+import {publishedContent} from './content.js';
 import {buildContactEmail} from './contact-email.js';
 import nodemailer from 'nodemailer';
 import {randomUUID} from 'node:crypto';
@@ -32,7 +33,7 @@ export function makeContactHandler({env=process.env,transportFactory=nodemailer.
  const proof=verifyChallenge(body.antispam,secret);if(!proof||!claimChallenge(proof))return send(400,{error:'La respuesta antispam es incorrecta o ha caducado. Responde la nueva pregunta e inténtalo de nuevo.'});
  if(body.supportTicket===true&&!portal)return send(503,{error:'El centro de tickets está pendiente de activación. Escribe a support@jeycee.shop.'});
  const reference=portal?createOrderNumber():'JC-'+randomUUID().slice(0,8).toUpperCase();
- if(portal){try{const saved=await capturePortal({env,req,fields,reference,kind:'ticket',submissionId:body.submissionId,proof,config,transportFactory,store:portalStore,notifier});return send(200,{sent:true,portal:true,reference:displayReference(saved.entry.reference),tracking:saved.tracking});}catch(error){if(error.retryAfter)res.setHeader('Retry-After',String(error.retryAfter));return send(error.status||503,{error:error.status&&error.status!==503?error.message:'No pudimos registrar tu consulta. Conserva el formulario e inténtalo de nuevo.'});}}
+ if(portal){try{const snapshot=await publishedContent({env,store:portalStore});fields.service=snapshot.content.services[body.service]?.name||fields.service;const saved=await capturePortal({env,req,fields,reference,kind:'ticket',submissionId:body.submissionId,proof,config,transportFactory,store:portalStore,notifier});return send(200,{sent:true,portal:true,reference:displayReference(saved.entry.reference),tracking:saved.tracking});}catch(error){if(error.retryAfter)res.setHeader('Retry-After',String(error.retryAfter));return send(error.status||503,{error:error.status&&error.status!==503?error.message:'No pudimos registrar tu consulta. Conserva el formulario e inténtalo de nuevo.'});}}
  const emailContent=buildContactEmail(fields,reference);
  let transport;
  try{

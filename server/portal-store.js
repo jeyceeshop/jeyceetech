@@ -1,3 +1,4 @@
+import {managedStore} from './managed-store.js';
 import {createHmac} from 'node:crypto';
 import {displayReference} from '../src/portal-data.js';
 export const portalEnabled=env=>typeof env.PORTAL_ENABLED==='string'&&env.PORTAL_ENABLED.trim().toLowerCase()==='true';
@@ -27,6 +28,7 @@ export function makePortalStore(env=process.env,fetcher=fetch){
  }
  async function rpc(name,args){return request('rpc/'+name,{method:'POST',body:args});}
  return {
+  ...managedStore({request,rpc}),
   async limit(scope,identity,max=10,seconds=600){const key=createHmac('sha256',env.SUPABASE_SERVICE_ROLE_KEY).update(scope+'\0'+identity).digest('hex');const allowed=await rpc('portal_allow_request',{p_key:key,p_limit:max,p_seconds:seconds});if(allowed!==true){const error=Error('Demasiados intentos. Espera unos minutos antes de reintentar.');error.status=429;error.retryAfter=seconds;throw error;}},
   async create(record){let result;try{result=await rpc('portal_create_numbered_entry',{p_entry:record});}catch(error){if(!error.portalNumberingMissing)throw error;result=await rpc('portal_create_entry',{p_entry:record});}if(result?.conflict){const error=Error('La solicitud cambió. Recarga la página antes de volver a enviar.');error.status=409;throw error;}return result;},
   async find(reference){const rows=await request('portal_entries?reference=eq.'+encodeURIComponent(reference)+'&select=*&limit=1');return rows[0]||null;},

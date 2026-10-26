@@ -1,5 +1,138 @@
 {
-  "rewrites": [],
+  "rewrites": [
+    {
+      "source": "/",
+      "destination": "/api/site?route=%2F"
+    },
+    {
+      "source": "/servicios",
+      "destination": "/api/site?route=%2Fservicios"
+    },
+    {
+      "source": "/planes",
+      "destination": "/api/site?route=%2Fplanes"
+    },
+    {
+      "source": "/quienes-somos",
+      "destination": "/api/site?route=%2Fquienes-somos"
+    },
+    {
+      "source": "/contacto",
+      "destination": "/api/site?route=%2Fcontacto"
+    },
+    {
+      "source": "/preguntas-frecuentes",
+      "destination": "/api/site?route=%2Fpreguntas-frecuentes"
+    },
+    {
+      "source": "/trabaja-con-nosotros",
+      "destination": "/api/site?route=%2Ftrabaja-con-nosotros"
+    },
+    {
+      "source": "/recursos",
+      "destination": "/api/site?route=%2Frecursos"
+    },
+    {
+      "source": "/servicios/desarrollo-web",
+      "destination": "/api/site?route=%2Fservicios%2Fdesarrollo-web"
+    },
+    {
+      "source": "/servicios/diseno-grafico",
+      "destination": "/api/site?route=%2Fservicios%2Fdiseno-grafico"
+    },
+    {
+      "source": "/servicios/manual-de-marca",
+      "destination": "/api/site?route=%2Fservicios%2Fmanual-de-marca"
+    },
+    {
+      "source": "/servicios/packaging",
+      "destination": "/api/site?route=%2Fservicios%2Fpackaging"
+    },
+    {
+      "source": "/servicios/identidad-de-marca",
+      "destination": "/api/site?route=%2Fservicios%2Fidentidad-de-marca"
+    },
+    {
+      "source": "/servicios/analisis-de-datos",
+      "destination": "/api/site?route=%2Fservicios%2Fanalisis-de-datos"
+    },
+    {
+      "source": "/servicios/diseno-de-interaccion",
+      "destination": "/api/site?route=%2Fservicios%2Fdiseno-de-interaccion"
+    },
+    {
+      "source": "/servicios/productos-digitales",
+      "destination": "/api/site?route=%2Fservicios%2Fproductos-digitales"
+    },
+    {
+      "source": "/servicios/branding-estrategico",
+      "destination": "/api/site?route=%2Fservicios%2Fbranding-estrategico"
+    },
+    {
+      "source": "/servicios/diseno-web",
+      "destination": "/api/site?route=%2Fservicios%2Fdiseno-web"
+    },
+    {
+      "source": "/servicios/tiendas-online",
+      "destination": "/api/site?route=%2Fservicios%2Ftiendas-online"
+    },
+    {
+      "source": "/servicios/landing-pages",
+      "destination": "/api/site?route=%2Fservicios%2Flanding-pages"
+    },
+    {
+      "source": "/servicios/desarrollo-apps",
+      "destination": "/api/site?route=%2Fservicios%2Fdesarrollo-apps"
+    },
+    {
+      "source": "/servicios/marketing-digital",
+      "destination": "/api/site?route=%2Fservicios%2Fmarketing-digital"
+    },
+    {
+      "source": "/servicios/redes-sociales",
+      "destination": "/api/site?route=%2Fservicios%2Fredes-sociales"
+    },
+    {
+      "source": "/servicios/seo",
+      "destination": "/api/site?route=%2Fservicios%2Fseo"
+    },
+    {
+      "source": "/servicios/publicidad-digital",
+      "destination": "/api/site?route=%2Fservicios%2Fpublicidad-digital"
+    },
+    {
+      "source": "/servicios/contenido-copywriting",
+      "destination": "/api/site?route=%2Fservicios%2Fcontenido-copywriting"
+    },
+    {
+      "source": "/servicios/motion-graphics",
+      "destination": "/api/site?route=%2Fservicios%2Fmotion-graphics"
+    },
+    {
+      "source": "/servicios/automatizacion",
+      "destination": "/api/site?route=%2Fservicios%2Fautomatizacion"
+    },
+    {
+      "source": "/servicios/mantenimiento-web",
+      "destination": "/api/site?route=%2Fservicios%2Fmantenimiento-web"
+    },
+    {
+      "source": "/recursos/cuanto-cuesta-una-pagina-web-panama",
+      "destination": "/api/site?route=%2Frecursos%2Fcuanto-cuesta-una-pagina-web-panama"
+    },
+    {
+      "source": "/recursos/diseno-web-o-desarrollo-web-panama",
+      "destination": "/api/site?route=%2Frecursos%2Fdiseno-web-o-desarrollo-web-panama"
+    },
+    {
+      "source": "/recursos/como-preparar-brief-diseno-grafico",
+      "destination": "/api/site?route=%2Frecursos%2Fcomo-preparar-brief-diseno-grafico"
+    },
+    {
+      "source": "/recursos/marketing-digital-para-pymes-panama",
+      "destination": "/api/site?route=%2Frecursos%2Fmarketing-digital-para-pymes-panama"
+    }
+  ],
   "redirects": [],
   "functions": {
     "api/contact.js": {
@@ -13,6 +146,10 @@
     },
     "api/tracking.js": {
       "maxDuration": 30
+    },
+    "api/site.js": {
+      "maxDuration": 30,
+      "includeFiles": "server/generated/site-template.html"
     }
   },
   "headers": [

@@ -59,7 +59,7 @@ Vercel detecta Vite: `npm run build`, salida `dist`. `vercel.json` utiliza `clea
 
 El inicio se construye en `src/home.js`: portada editorial, datos del catálogo, introducción al estudio, orientación por etapa de negocio, catálogo, principios de trabajo, proceso de cuatro etapas, planes, preguntas frecuentes y contacto. Las cifras de especialidades/4/1 describen servicios, niveles y visión; no son datos inventados de clientes o resultados.
 
-Se implementó la opción de precios publicados solicitada. No hay panel administrativo ni credenciales de administrador. Para cambiar tarifas, edita el objeto `pricing` en `src/pricing.js`, conserva `business: null`, valida con `node --test tests/*.test.js` y `npm run build`, y publica el cambio mediante Git. Los precios propuestos corresponden al alcance y no se presentan como investigación de mercado verificada.
+Los precios iniciales se definen en `src/pricing.js`. El portal ahora permite publicar precios, entregables, planes, textos y vacantes desde `/admin` sin editar código; consulta [la activación del editor y cotizaciones](docs/cotizaciones-y-contenido.md). Los precios corresponden al alcance y no se presentan como investigación de mercado verificada.
 
 ## Catálogo de agencia ampliado
 
@@ -113,7 +113,7 @@ Contáctanos envía por SMTP al destinatario según el área cuando está config
 
 ## Trabaja con nosotros
 
-El inicio incluye, al final, las tarjetas de Asistente de mercadeo y Telemarketing. El pie enlaza a `/trabaja-con-nosotros`, con ambas vacantes, funciones, requisitos, estándares de excelencia y proceso de postulación. Datos y plantillas en `src/careers.js`. Las cinco estrellas representan un objetivo de atención, no testimonios o puntuación de clientes.
+Las oportunidades de Asistente de mercadeo y Telemarketing se presentan exclusivamente en la página de vacantes. El pie enlaza a `/trabaja-con-nosotros`, con ambas vacantes, funciones, requisitos, estándares de excelencia y proceso de postulación. Datos y plantillas en `src/careers.js`. Las cinco estrellas representan un objetivo de atención, no testimonios o puntuación de clientes.
 
 Cada botón abre un correo a rrhh@jeycee.shop con `[EMPLEO]` y el nombre del cargo en el asunto. El candidato debe adjuntar su CV y confirmar el envío desde su correo. No hay carga de CV en servidor ni confirmación automática de recepción, entrevista o contratación. Modalidad, horario y remuneración no se inventan; deben confirmarse con RRHH.
 
@@ -240,3 +240,7 @@ Implementación y pasos de Search Console: [docs/seo-panama.md](docs/seo-panama.
 La verificación de jeycee.shop y el envío del sitemap en Google Search Console requieren tu cuenta de Google y el TXT emitido para ella. El código no contiene un token inventado ni afirma que Google haya indexado o posicionado las páginas. No se requieren nuevas variables de Vercel para publicar estas mejoras.
 
 Instagram oficial: [@jeycee.shop](https://www.instagram.com/jeycee.shop/), indicado por el titular. Se muestra en el pie y Contáctanos y se declara en los datos estructurados de la organización. Configuración en `src/social.js`; no hay widgets externos ni seguimiento añadido.
+
+## Cotizaciones y contenido administrable
+
+El portal incorpora borradores, envío de propuestas HTML y aceptación o solicitud de ajustes del cliente en Seguimiento. El editor publica servicios, precios, planes, textos de inicio/empresa y vacantes. Ejecuta `database/admin-proposals-content.sql` para actualizar una base existente; no se necesitan variables nuevas. [Instrucciones de activación y uso](docs/cotizaciones-y-contenido.md). Las páginas públicas se renderizan en Vercel con contenido y SEO vigentes, conservando sitemap y errores 404 reales.

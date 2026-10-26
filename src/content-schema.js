@@ -1,0 +1,28 @@
+import {defaultContent,serviceIds,planIds} from './content-defaults.js';
+const invalid=message=>{const error=Error(message);error.status=400;throw error;};
+export function plainText(value,label,max=1000,{optional=false}={}){if(typeof value!=='string')invalid('Revisa '+label+'.');const clean=value.trim();if((!optional&&!clean)||clean.length>max||/[<>\u0000-\u0008\u000b\u000c\u000e-\u001f]/.test(clean))invalid('Revisa '+label+': usa texto sin HTML, de hasta '+max+' caracteres.');return clean;}
+const object=(value,label)=>{if(!value||typeof value!=='object'||Array.isArray(value))invalid('Revisa '+label+'.');return value;};
+export function textList(value,label,{max=12,length=250,min=1}={}){if(!Array.isArray(value)||value.length<min||value.length>max)invalid('Revisa '+label+': de '+min+' a '+max+' elementos.');return value.map(item=>plainText(item,label,length));}
+function only(value,keys,label){object(value,label);if(Object.keys(value).some(key=>!keys.includes(key)))invalid('Hay campos no admitidos en '+label+'.');}
+export function normalizeService(value){
+ only(value,['name','short','definition','approach','inputs','audience','faq','outcomes','exclusions','cadence','seoTitle','seoDescription','plans'],'el servicio');
+ const result={};for(const [key,max] of Object.entries({name:90,short:220,definition:2000,approach:2000,inputs:1500,audience:1200,faq:2000,exclusions:1500,seoTitle:75,seoDescription:185}))result[key]=plainText(value[key],key,max);
+ if(!['month','project'].includes(value.cadence))invalid('Selecciona el periodo de cobro.');result.cadence=value.cadence;result.outcomes=textList(value.outcomes,'resultados del servicio',{max:10,length:300});
+ only(value.plans,planIds,'los planes');result.plans={};for(const id of planIds){const p=value.plans[id];only(p,['price','items','exclusions'],'el plan '+id);if(p.price!==null&&(!Number.isFinite(p.price)||p.price<1||p.price>1000000||Math.abs(Math.round(p.price*100)-p.price*100)>0.000001))invalid('El precio debe ser un importe positivo en USD con hasta dos decimales, o a cotización.');result.plans[id]={price:p.price,items:textList(p.items,'entregables de '+id,{max:12,length:250}),exclusions:plainText(p.exclusions,'exclusiones de '+id,1500)};}
+ return result;
+}
+export function normalizeVacancies(value){
+ if(!Array.isArray(value)||value.length>30)invalid('Se admiten hasta 30 vacantes.');const ids=new Set();return value.map(job=>{only(job,['id','title','area','intro','responsibilities','requirements','excellence','evidence','active'],'la vacante');if(typeof job.id!=='string'||!(/^[a-z0-9][a-z0-9-]{2,79}$/).test(job.id)||ids.has(job.id))invalid('Identificador de vacante inválido o duplicado.');ids.add(job.id);if(typeof job.active!=='boolean')invalid('Indica si la vacante está abierta.');return {id:job.id,active:job.active,title:plainText(job.title,'título de vacante',120),area:plainText(job.area,'área',120),intro:plainText(job.intro,'descripción de vacante',1200),responsibilities:textList(job.responsibilities,'funciones',{max:15,length:300}),requirements:textList(job.requirements,'requisitos',{max:15,length:300}),excellence:textList(job.excellence,'estándares',{max:10,length:300}),evidence:plainText(job.evidence,'cómo aplicar',1000)};});
+}
+export function normalizeContent(value){
+ only(value,['schemaVersion','home','about','planLabels','featuredPlan','services','vacancies'],'el contenido');if(value.schemaVersion!==1)invalid('La versión de contenido no es compatible.');
+ only(value.home,['title','location','emphasis','description'],'la portada');const home={title:plainText(value.home.title,'título de portada',70),location:plainText(value.home.location,'segunda línea',70),emphasis:plainText(value.home.emphasis,'frase destacada',90),description:plainText(value.home.description,'descripción de portada',700)};
+ only(value.about,['intro','mission','vision'],'Quiénes somos');const about={intro:plainText(value.about.intro,'presentación',800),mission:textList(value.about.mission,'misión',{max:4,length:1200}),vision:textList(value.about.vision,'visión',{max:4,length:1200})};
+ only(value.planLabels,planIds,'descripciones de planes');const planLabels=Object.fromEntries(planIds.map(id=>[id,plainText(value.planLabels[id],'descripción de '+id,300)]));if(!['',...planIds].includes(value.featuredPlan))invalid('Plan destacado no válido.');
+ only(value.services,serviceIds,'catálogo');const catalog={};for(const id of serviceIds)catalog[id]=normalizeService(value.services[id]);
+ const result={schemaVersion:1,home,about,planLabels,featuredPlan:value.featuredPlan,services:catalog,vacancies:normalizeVacancies(value.vacancies)};if(new TextEncoder().encode(JSON.stringify(result)).length>450000)invalid('El contenido supera el límite de publicación. Reduce la extensión de textos o vacantes.');return result;
+}
+export function contentPatch(current,section,id,value){const next=structuredClone(current);if(section==='service'){if(!serviceIds.includes(id))invalid('Servicio no válido.');next.services[id]=value;}else if(section==='home'||section==='about'||section==='vacancies')next[section]=value;else if(section==='plans'){only(value,['labels','featured'],'planes');next.planLabels=value.labels;next.featuredPlan=value.featured;}else invalid('Sección de contenido no válida.');return normalizeContent(next);}
+export function resolveContent(record){return {version:record?.version||0,content:record?.version>0?normalizeContent(record.document):defaultContent(),updatedAt:record?.updated_at||null,setupRequired:record?.setupRequired===true};}
+
+export function publicContentSnapshot(snapshot){return {...snapshot,content:{...snapshot.content,vacancies:snapshot.content.vacancies.filter(job=>job.active)}};}

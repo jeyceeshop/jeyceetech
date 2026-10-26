@@ -1,3 +1,6 @@
+import {applyContent} from './content.js';
+import {priceLabel} from './pricing.js';
+import {managedVersion} from './content-state.js';
 import {orderReferencePattern} from './portal-data.js';
 import {trackingReceipt} from './tracking-receipt.js';
 import {installAntiSpam} from './antispam.js';
@@ -31,8 +34,13 @@ export function initBrief(){
   busy=true;submit.disabled=true;submit.textContent='Creando pedido…';status.textContent='Enviando tu pedido a Jey Cee…';
   try{
    const fingerprint=JSON.stringify([data.name,data.email,data.company,data.countryCode,data.phone,data.product,data.brief,data.serviceDetails]);if(lastSubmission&&lastSubmission!==fingerprint)submissionId=crypto.randomUUID();lastSubmission=fingerprint;
-   const response=await fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...data,submissionId,privacy:form.elements.privacy.checked,antispam:guard.payload()})});
+   const response=await fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...data,contentVersion:managedVersion,submissionId,privacy:form.elements.privacy.checked,antispam:guard.payload()})});
    let order;try{order=await response.json();}catch{throw Error('No pudimos confirmar la creación del pedido. Tus datos siguen en el formulario.');}
+   if(response.status===409&&order.code==='CATALOG_CHANGED'){
+    const refreshed=await fetch('/api/content',{cache:'no-store'});if(!refreshed.ok)throw Error('El catálogo cambió y no pudimos actualizarlo. Tus datos siguen aquí; reintenta en un momento.');applyContent(await refreshed.json());
+    for(const option of select.options){const p=products.find(p=>p.key===option.value);if(p)option.textContent=p.name+' · '+priceLabel(p.price,p.cadence);}document.querySelector('#order-summary').innerHTML=orderSummary(getProduct());
+    throw Error('Actualizamos el precio y los entregables del plan. Revisa el resumen antes de volver a solicitar. Tu brief se conserva.');
+   }
    if(!response.ok||order.created!==true)throw Error(order.error||'No pudimos crear el pedido. Intenta más tarde.');
    if(!orderReferencePattern.test(order.number))throw Error('No pudimos confirmar el número del pedido. Consulta con la agencia antes de repetirlo.');
    const target=new URL(order.whatsappUrl);if(target.hostname!=='wa.me'||target.pathname!=='/50760913544')throw Error('No pudimos preparar el seguimiento por WhatsApp.');

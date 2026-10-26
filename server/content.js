@@ -1,0 +1,4 @@
+import {makePortalStore,portalConfigured} from './portal-store.js';
+import {resolveContent,publicContentSnapshot} from '../src/content-schema.js';
+export async function publishedContent({env=process.env,store}={}){if(!portalConfigured(env)||store&&!store.getContent)return resolveContent(null);try{return resolveContent(await (store||makePortalStore(env)).getContent());}catch{const error=Error('No pudimos consultar el contenido publicado. Inténtalo de nuevo en un momento.');error.status=503;throw error;}}
+export function makeContentHandler(options={}){return async(req,res)=>{res.setHeader('Cache-Control','no-store');res.setHeader('X-Robots-Tag','noindex');if(req.method!=='GET')return res.status(405).json({error:'Método no permitido.'});try{return res.status(200).json(publicContentSnapshot(await publishedContent(options)));}catch{return res.status(503).json({error:'No pudimos consultar el catálogo actualizado. Inténtalo de nuevo.'});}};}

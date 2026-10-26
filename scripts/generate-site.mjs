@@ -6,6 +6,7 @@ import {promotionBanner} from '../src/commercial.js';
 import {navigationHtml,footerDirectoryHtml} from '../src/site-layout.js';
 import {staticPaths,indexablePaths,seoHead,breadcrumbHtml,site} from '../src/seo.js';
 const destination='dist',template=await readFile(join(destination,'index.html'),'utf8');
+await mkdir('server/generated',{recursive:true});await writeFile('server/generated/site-template.html',template);
 for(const marker of ['SEO_HEAD','APP_NAV','APP_MAIN','APP_FOOTER','APP_BANNER'])if(!template.includes('<!--'+marker+'-->'))throw Error('Missing HTML marker: '+marker);
 for(const path of [...staticPaths,'/404']){
  const content=path==='/'?renderHome():breadcrumbHtml(path)+renderPage(path).html;

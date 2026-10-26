@@ -1,3 +1,5 @@
+import './admin-tools.css';
+import {initializeContent} from './content.js';
 import {initBrief} from './brief.js';
 import './brief-fields.css';
 import './seo.css';
@@ -18,6 +20,7 @@ import {promotionBanner} from './commercial.js';
 import {priceLabel} from './pricing.js';
 import {renderHome} from './home.js';
 import {renderPage,planCards,serviceCards,note,orderSummary,escape} from './pages.js';
+const contentSnapshot=await initializeContent(location.pathname);
 document.querySelector('.promotion-strip')?.remove();
 const banner=promotionBanner();document.body.classList.toggle('has-promotion',!!banner);if(banner){document.body.classList.add('has-promotion');document.querySelector('header').insertAdjacentHTML('beforebegin',banner);}
 let path=location.pathname.replace(/\/+$/,'')||'/';
@@ -30,7 +33,7 @@ if(path!=='/'){const page=renderPage(path);main.className='inner-page section';m
  main.innerHTML=renderHome();
 }
 applySeo(path);
-if(!document.querySelector('.footer-directory'))document.querySelector('footer').insertAdjacentHTML('afterbegin',footerDirectoryHtml());
+const footerDirectory=document.querySelector('.footer-directory');if(footerDirectory)footerDirectory.outerHTML=footerDirectoryHtml();else document.querySelector('footer').insertAdjacentHTML('afterbegin',footerDirectoryHtml());
 document.querySelectorAll('form:not(#request-form):not(#checkout-form):not([data-portal-form])').forEach(form=>installAntiSpam(form));
 initContact();
 document.querySelector('#year').textContent=new Date().getFullYear();
@@ -54,7 +57,7 @@ document.querySelector('#download-brief').addEventListener('click',()=>download(
 document.querySelector('#download-brief').insertAdjacentHTML('afterend','<a class="button outline" id="send-summary">Abrir solicitud en mi correo ↗</a>');
 const originalShow=showSummary;function present(text,email=mailboxes.business){originalShow(text);document.querySelector('#send-summary').href=mailLink((email===mailboxes.orders?'[PEDIDOS]':'[COTIZACIÓN]')+' Solicitud — Jey Cee',text,email);document.querySelector('dialog > p').textContent='Descarga el resumen o abre un correo a '+email+'. Nada se envía automáticamente.';}
 const contact=document.querySelector('#contact-form');contact?.addEventListener('submit',e=>{e.preventDefault();const d=new FormData(contact);present(`SOLICITUD PARA JEYCEE TECH\nCotización gratis, sin obligación de compra.\nNo es factura ni comprobante de pago.\n\nNombre: ${d.get('name')}\nCorreo: ${d.get('email')}\nServicio: ${d.get('service')}\n\nProyecto:\n${d.get('message')}`);});
-initBrief();
+if(contentSnapshot.unavailable&&document.querySelector('#checkout-form')){document.querySelector('#checkout-form').innerHTML='<p role="alert">No pudimos consultar los planes actualizados. Recarga la página o contáctanos por WhatsApp.</p>';}else initBrief();
 if(path==='/admin'||path==='/admin/demo')import('./admin.js').then(m=>m.initAdmin({demo:path==='/admin/demo'}));
 if(path==='/seguimiento')import('./tracking.js').then(m=>m.initTracking());
 const reviewForm=document.querySelector('#review-form');if(reviewForm){const key='jeycee-local-reviews-v1';let reviews=[];try{const saved=JSON.parse(localStorage.getItem(key)||'[]');if(Array.isArray(saved))reviews=saved.filter(r=>typeof r.id==='string'&&typeof r.author==='string'&&typeof r.text==='string'&&Number.isInteger(r.rating)&&r.rating>=1&&r.rating<=5).slice(0,50);}catch{}

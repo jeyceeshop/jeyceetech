@@ -103,3 +103,7 @@ En `/soporte` el cliente abre su ticket. En `/seguimiento`, indica número y ema
 Si ya existe un ticket, responde en su conversación para conservar el historial. Los mensajes enviados fuera del portal por email o WhatsApp no se incorporan automáticamente. El acceso sigue usando una contraseña del equipo; las firmas no crean cuentas ni permisos individuales.
 
 La campaña de cupones fue retirada del registro, checkout y administración. Su endpoint devuelve 410 y no envía correos. Los registros antiguos permanecen privados en Supabase si se llegó a activar esa campaña; no se eliminan automáticamente. No hace falta ejecutar SQL nuevo para retirar la campaña ni modificar las variables de Vercel.
+
+## Cotizaciones y editor de contenido
+
+Para añadir estas funciones al portal existente, ejecuta todo [database/admin-proposals-content.sql](../database/admin-proposals-content.sql) en Supabase → SQL Editor → Run. No requiere nuevas variables ni cambiar la contraseña. Se conserva la información actual. Consulta [las instrucciones de publicación y aceptación](cotizaciones-y-contenido.md).

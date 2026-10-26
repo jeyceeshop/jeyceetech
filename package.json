@@ -5,11 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
-    "build": "vite build && node scripts/generate-site.mjs && node scripts/check-seo.mjs",
+    "build": "vite build && node scripts/generate-site.mjs && node scripts/check-seo.mjs && node scripts/prepare-runtime.mjs",
     "preview": "vite preview --host 0.0.0.0",
     "test": "node --test tests/*.test.js"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.11",
     "vite": "^7.1.0"
   },
   "dependencies": {

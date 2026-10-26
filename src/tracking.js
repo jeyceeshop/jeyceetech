@@ -1,3 +1,4 @@
+import {quoteCard} from './quote-ui.js';
 import {installAntiSpam} from './antispam.js';
 import {portalRequest,esc,badge,dateLabel,messageCards} from './portal-ui.js';
 import {statusFor} from './portal-data.js';
@@ -16,11 +17,21 @@ export function initTracking(){
  const lookupStatus=document.querySelector('#tracking-lookup-status'),replyStatus=document.querySelector('#tracking-message-status'),verifyStatus=document.querySelector('#tracking-verify-status');
  const lookupGuard=guardFor(lookup,lookupStatus),replyGuard=guardFor(reply,replyStatus),verifyGuard=guardFor(verify,verifyStatus);lookupGuard.renew();
  function paint(data){
-  reply.hidden=!data.conversationAvailable;verify.hidden=!data.contactRequired;document.querySelector('#tracking-legacy-help').hidden=data.conversationAvailable===true||data.contactRequired===true;
+  reply.hidden=!data.conversationAvailable;verify.hidden=!(data.contactRequired||data.quoteContactRequired);document.querySelector('#tracking-legacy-help').hidden=data.conversationAvailable===true||data.contactRequired===true;
   document.querySelector('#tracking-summary').innerHTML=`<article class="panel tracking-summary"><span class="eyebrow">${data.entry.kind==='order'?'PEDIDO':'TICKET'} / ${esc(data.entry.reference)}</span>${badge(data.entry.status)}<h2>${esc(data.entry.service)}</h2>${data.entry.plan?'<p>'+esc(data.entry.plan)+'</p>':''}<p>${statusFor(data.entry.status).hint}</p><dl><div><dt>Recibido</dt><dd>${dateLabel(data.entry.createdAt)}</dd></div><div><dt>Última actualización</dt><dd>${dateLabel(data.entry.updatedAt)}</dd></div>${data.entry.dueDate?'<div><dt>Fecha objetivo acordada</dt><dd>'+dateLabel(data.entry.dueDate)+'</dd></div>':''}</dl></article>`;
+  paintQuotes(data);
   const thread=document.querySelector('#tracking-messages');thread.innerHTML=messageCards(data.messages);thread.scrollTop=thread.scrollHeight;
  }
- async function prepareConversation(data){if(data.contactRequired)await verifyGuard.renew();else if(data.conversationAvailable)await replyGuard.renew();}
+ function paintQuotes(data){
+  let box=document.querySelector('#tracking-quotes');if(!box){box=document.createElement('section');box.id='tracking-quotes';document.querySelector('#tracking-summary').after(box);}
+  box.innerHTML=(data.quotes||[]).length?'<h2>Tus cotizaciones.</h2>'+data.quotes.map(q=>quoteCard(q)+(q.status==='sent'?`<form data-portal-form data-quote="${esc(q.id)}" class="panel quote-decision"><h3>Responder a ${esc(q.number)}</h3><label>Tu nombre *<input name="name" required minlength="2" maxlength="100" autocomplete="name"></label><label>Respuesta<select name="decision"><option value="accept">Aceptar esta propuesta</option><option value="changes">Solicitar ajustes</option></select></label><label data-change-note hidden>Ajustes que necesitas *<textarea name="note" rows="3" maxlength="1000"></textarea></label><label class="checkbox" data-consent><input type="checkbox" name="consent" required><span>He leído los entregables, el precio, el plazo y las condiciones de esta propuesta y los acepto. Esta acción no confirma un pago.</span></label><button type="submit" class="button light">Confirmar respuesta</button><p role="status" data-decision-status></p></form>`:'')).join(''):'';
+  for(const form of box.querySelectorAll('form')){
+   const q=data.quotes.find(q=>q.id===form.dataset.quote),status=form.querySelector('[data-decision-status]'),guard=guardFor(form,status);guard.renew();
+   form.elements.decision.onchange=()=>{const changes=form.elements.decision.value==='changes';form.querySelector('[data-change-note]').hidden=!changes;form.elements.note.required=changes;form.querySelector('[data-consent]').hidden=changes;form.elements.consent.required=!changes;};
+   form.onsubmit=async event=>{event.preventDefault();if(!credentials||guard.button.disabled)return;guard.setBusy(true);status.textContent='Registrando respuesta…';try{const response=await portalRequest('/api/tracking',{method:'POST',body:JSON.stringify({...credentials,action:'quote-decision',id:q.id,version:q.version,name:form.elements.name.value,decision:form.elements.decision.value,note:form.elements.note.value,consent:form.elements.consent.checked,antispam:guard.guard.payload()})});paint(response);replyStatus.textContent='Respuesta registrada. El equipo podrá verla en administración.';}catch(error){status.textContent=error.message;await guard.renew();guard.setBusy(false);}};
+  }
+ }
+ async function prepareConversation(data){if(data.contactRequired||data.quoteContactRequired)await verifyGuard.renew();if(data.conversationAvailable)await replyGuard.renew();}
  lookup.addEventListener('submit',async event=>{
   event.preventDefault();if(lookupGuard.button.disabled)return;lookupGuard.setBusy(true);lookupStatus.textContent='Consultando…';
   try{

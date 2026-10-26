@@ -1,3 +1,5 @@
+import {publishedContent} from './content.js';
+import {applyContent} from '../src/content.js';
 import nodemailer from 'nodemailer';
 import {smtpConfig,smtpConfigIssue} from './contact.js';
 import {issueChallenge,verifyChallenge,claimChallenge} from './antispam.js';
@@ -20,8 +22,11 @@ export function makeOrdersHandler({env=process.env,transportFactory=nodemailer.c
  if(!req.headers['content-type']?.includes('application/json'))return send(415,{error:'Formato de solicitud no válido.'});
  let data,product,offer;
  try{
+  const snapshot=await publishedContent({env,store:portalStore});
   data=typeof req.body==='string'?JSON.parse(req.body):req.body;
   if(!data||data.website||data.privacy!==true)throw Error('Revisa el consentimiento y la verificación antispam.');
+  if(data.contentVersion!==undefined&&data.contentVersion!==snapshot.version)return send(409,{code:'CATALOG_CHANGED',error:'El catálogo se actualizó. Recarga los planes antes de solicitar.'});
+  applyContent(snapshot);
   if(typeof data.product!=='string')throw Error('Selecciona un servicio y un plan.');
   const service=premiumServices.find(s=>data.product.startsWith(s.slug+'--'));
   product=service?tiersFor(service).find(p=>p.key===data.product):null;
@@ -30,7 +35,7 @@ export function makeOrdersHandler({env=process.env,transportFactory=nodemailer.c
   if(/[\r\n]/.test(data.name||''))throw Error('Revisa tu nombre.');
   if(data.coupon)throw Error('Los cupones ya no están disponibles. Elimina el código para continuar.');
   offer={price:product.price,code:''};briefMessage(product,data,'por asignar');
- }catch(error){return send(400,{error:error instanceof SyntaxError?'Solicitud no válida.':error.message});}
+ }catch(error){return send(error.status===503?503:400,{error:error.status===503?'No pudimos consultar los planes actualizados. Inténtalo más tarde.':error instanceof SyntaxError?'Solicitud no válida.':error.message});}
  const proof=verifyChallenge(data.antispam,secret);if(!proof||!claimChallenge(proof))return send(400,{error:'La verificación antispam es incorrecta o caducó. Responde la nueva pregunta.'});
  const number=createOrderNumber(),createdAt=new Date().toISOString();
  const message=briefMessage(product,data,number);

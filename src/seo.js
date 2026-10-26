@@ -1,3 +1,4 @@
+import {managedContent} from './content-state.js';
 import {services} from './catalog.js';
 import {officialInstagram} from './social.js';
 import {serviceSeo} from './service-seo.js';
@@ -35,7 +36,7 @@ export const staticPaths=[...indexablePaths,...Object.keys(privatePages)];
 const cleanPath=path=>('/'+String(path||'').split(/[?#]/)[0].replace(/^\/+|\/+$/g,'')).replace(/\/{2,}/g,'/');
 export function seoFor(rawPath='/'){
  const path=cleanPath(rawPath),service=services.find(s=>path==='/servicios/'+s.slug),guide=guides.find(g=>path==='/recursos/'+g.slug);let data=pages[path];
- if(service){const local=serviceSeo[service.slug];data={title:local.title,description:local.description,questions:local.questions,label:service.name,service};}
+ if(service){const local=serviceSeo[service.slug];data={title:managedContent?.services[service.slug].seoTitle||local.title,description:managedContent?.services[service.slug].seoDescription||local.description,questions:local.questions,label:service.name,service};}
  if(guide)data={title:guideTitles[guide.slug],description:guide.description,label:guide.title,guide,type:'Article'};
  if(privatePages[path])data={title:privatePages[path][0],description:privatePages[path][1],label:privatePages[path][0].split(' | ')[0],noindex:true};
  const found=!!data;if(!found)data={title:'Página no encontrada | Jey Cee',description:'Este enlace no está disponible. Explora los servicios de Jey Cee en Panamá.',label:'Página no encontrada',noindex:true};

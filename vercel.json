@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/portafolio",
+      "destination": "/api/site?route=%2Fportafolio"
+    },
+    {
       "source": "/",
       "destination": "/api/site?route=%2F"
     },
@@ -131,6 +135,22 @@
     {
       "source": "/recursos/marketing-digital-para-pymes-panama",
       "destination": "/api/site?route=%2Frecursos%2Fmarketing-digital-para-pymes-panama"
+    },
+    {
+      "source": "/portafolio/marea-estudio",
+      "destination": "/api/site?route=%2Fportafolio%2Fmarea-estudio"
+    },
+    {
+      "source": "/portafolio/savie-botanica",
+      "destination": "/api/site?route=%2Fportafolio%2Fsavie-botanica"
+    },
+    {
+      "source": "/portafolio/brasa-cocina",
+      "destination": "/api/site?route=%2Fportafolio%2Fbrasa-cocina"
+    },
+    {
+      "source": "/portafolio/aurea-bienestar",
+      "destination": "/api/site?route=%2Fportafolio%2Faurea-bienestar"
     }
   ],
   "redirects": [],

@@ -1,3 +1,4 @@
+import {projects} from './portfolio.js';
 import {trackingReceipt} from './tracking-receipt.js';
 import {services} from './catalog.js';
 import {officialInstagram} from './social.js';
@@ -10,6 +11,8 @@ export function initContact(){
  const result=document.querySelector('#request-result'),status=document.querySelector('#request-status'),submit=form.querySelector('[type=submit]');
  const params=new URLSearchParams(location.search);if(contactTopics.some(t=>t.id===params.get('tipo')))form.elements.topic.value=params.get('tipo');
  if(services.some(s=>s.slug===params.get('servicio')))form.elements.service.value=params.get('servicio');
+ const project=projects.find(p=>p.slug===params.get('proyecto'));if(project&&!form.elements.message.value)form.elements.message.value='Hola, me interesa un proyecto inspirado en '+project.name+', el ejemplo conceptual de su portafolio. Mi negocio es: \nLo que me gustaría crear: \nMi objetivo: ';
+
  function destination(){const topic=contactTopics.find(t=>t.id===form.elements.topic.value);const box=document.querySelector('#request-destination');box.replaceChildren();const label=document.createElement('span');label.className='eyebrow';label.textContent='TU CONSULTA IRÁ A';const value=document.createElement('b');value.textContent=topic?.email||'Selecciona un motivo para ver el equipo destinatario.';box.append(label,value);}
  form.elements.topic.addEventListener('change',destination);destination();
  async function fetchChallenge(){const response=await fetch('/api/contact',{cache:'no-store',headers:{Accept:'application/json'}});let data;try{data=await response.json();}catch{throw Error('No pudimos conectar con el servicio de contacto. Intenta más tarde o usa los correos de contacto directo.');}if(!response.ok||!data.challenge?.token)throw Error(data.error||'No se pudo cargar la verificación antispam.');return data.challenge;}

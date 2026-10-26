@@ -1,3 +1,4 @@
+import {portfolioPreview} from './portfolio.js';
 import {managedContent} from './content-state.js';
 import {promotionActive,promotion} from './offers.js';
 import {contactUrl,services,serviceGroups} from './catalog.js';
@@ -11,6 +12,7 @@ export function renderHome(){return `
 </section>
 <section class="section priority-services" id="destacados"><div class="section-heading"><span class="eyebrow">DOS ESPECIALIDADES / TODO EL POTENCIAL</span><h2>Una web que funciona.<br/><em>Un diseño que destaca.</em></h2><p>${promotionActive()?'10% de descuento hasta el '+promotion.label+'.<br/>':''}Cotización gratis para ambos servicios.</p></div><div class="priority-grid"><a href="/servicios/desarrollo-web"><span class="eyebrow">01 / DESARROLLO WEB</span>${promotionActive()?'<span class="offer-pill">−10%</span>':''}<h3>Tu negocio,<br/><em>conectado.</em></h3><p>Webs corporativas adaptables, formularios, contenido y tecnología para construir tu presencia online.</p><span class="priority-action">Ver planes de desarrollo web ↗</span></a><a href="/servicios/diseno-grafico"><span class="eyebrow">02 / DISEÑO GRÁFICO</span>${promotionActive()?'<span class="offer-pill">−10%</span>':''}<h3>Tu mensaje,<br/><em>bien diseñado.</em></h3><p>Piezas digitales e impresas que comunican con claridad y mantienen el carácter de tu marca.</p><span class="priority-action">Ver planes de diseño gráfico ↗</span></a></div></section>
 
+${portfolioPreview()}
 ${renderHomeProcess()}
 <section class="section home-overview" id="servicios"><div class="section-heading"><span class="eyebrow">UNA AGENCIA / TODAS LAS PIEZAS</span><h2>Lo que tu marca necesita.<br/><span class="muted">En el lugar correcto.</span></h2><p>Explora nuestras ${services.length} especialidades.<br/>Los detalles y planes están en cada servicio.</p></div><div class="overview-grid">${serviceGroups.map((g,i)=>`<a href="/servicios#categoria-${g.id}"><span class="eyebrow">0${i+1} / ${services.filter(s=>s.group===g.id).length} ESPECIALIDADES</span><h3>${g.name}</h3><p>${g.description}</p><span class="overview-action">Explorar servicios ↗</span></a>`).join('')}</div><div class="section-end-link"><a class="text-link" href="/servicios">Ver todos los servicios ↗</a><a class="text-link" href="/planes">Comparar planes y precios ↗</a></div></section>
 ${renderBrandReferences()}

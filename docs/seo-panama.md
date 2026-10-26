@@ -4,7 +4,7 @@
 
 Dominio canónico: **https://www.jeycee.shop**. Se conserva el nombre visible Jey Cee y las variantes de marca JeyCee Tech / JeyCee en los datos de la organización. Teléfono oficial: +507 6091-3544; ventas: business@jeycee.shop; soporte: support@jeycee.shop. No se inventa dirección física, presencia en Google Maps, clientes, premios, reseñas ni posiciones en buscadores.
 
-`npm run build` ejecuta Vite y `scripts/generate-site.mjs`. Publica 43 documentos HTML completos: 33 URLs indexables, nueve páginas auxiliares con noindex y el 404. Las páginas públicas se leen sin ejecutar JavaScript; sus interacciones siguen funcionando con el mismo código del sitio. El menú y el pie también aparecen en el HTML inicial. Sin JavaScript, se ocultan los formularios para evitar envíos nativos con datos personales en la URL, y se ofrece contacto directo.
+`npm run build` ejecuta Vite y `scripts/generate-site.mjs`. Publica 48 documentos HTML completos: 38 URLs indexables, nueve páginas auxiliares con noindex y el 404. Las páginas públicas se leen sin ejecutar JavaScript; sus interacciones siguen funcionando con el mismo código del sitio. El menú y el pie también aparecen en el HTML inicial. Sin JavaScript, se ocultan los formularios para evitar envíos nativos con datos personales en la URL, y se ofrece contacto directo.
 
 Vercel usa archivos estáticos y `cleanUrls: true`, sin el antiguo rewrite global a index.html. Las rutas desconocidas usan el 404.html con estado HTTP 404 del alojamiento; no se generan páginas vacías con estado 200 para URLs inventadas. Las APIs y los controles de autenticación permanecen separados. Vite preview no reproduce exactamente los estados y redirecciones de Vercel: el verificador de producción local simula las rutas limpias y los errores para revisar el resultado del build.
 
@@ -37,7 +37,7 @@ Los contenidos están en `src/resources.js`. Las tarifas de la guía se calculan
 
 `src/seo.js` comparte los metadatos entre generación HTML y navegador. Cada página indexable tiene título, descripción, canonical sin query/fragment, idioma es-PA, Open Graph, tarjeta social y JSON-LD. Los enlaces de navegación incluyen migas de pan. El HTML inicial tiene el contenido del servicio correcto; no depende de que el buscador reemplace un título genérico tras ejecutar JavaScript.
 
-Se generan `/sitemap.xml` y `/robots.txt`. El sitemap contiene únicamente las 33 URLs públicas canónicas, con una sola versión por página. No se inventan fechas lastmod para aparentar actualizaciones. Robots permite rastrear el sitio y excluye `/api/`. Admin, checkout, seguimiento, soporte, facturación, reseñas y páginas legales muestran noindex. El noindex no es una medida de seguridad: la administración conserva autenticación y las conversaciones conservan comprobación de contacto.
+Se generan `/sitemap.xml` y `/robots.txt`. El sitemap contiene únicamente las 38 URLs públicas canónicas, con una sola versión por página. No se inventan fechas lastmod para aparentar actualizaciones. Robots permite rastrear el sitio y excluye `/api/`. Admin, checkout, seguimiento, soporte, facturación, reseñas y páginas legales muestran noindex. El noindex no es una medida de seguridad: la administración conserva autenticación y las conversaciones conservan comprobación de contacto.
 
 JSON-LD representa Organization, WebSite, WebPage, BreadcrumbList, Service, ItemList, FAQPage y Article cuando corresponden. Las preguntas y respuestas marcadas son las que se muestran en cada servicio. No se marca un promedio de cinco estrellas ni se prometen resultados enriquecidos. Las referencias de otras marcas no aparecen como clientes ni vínculos sameAs. No se incluye SearchAction porque el sitio no tiene un buscador interno.
 
@@ -70,3 +70,7 @@ Antes de publicar cambios de dominio, actualiza `site.origin` en `src/seo.js` y 
 ## Comprobación
 
 `npm run build` y `node --test tests/*.test.js`. Las pruebas de SEO revisan HTML final sin JavaScript, metadatos únicos, datos estructurados, enlaces internos, rutas del sitemap, exclusión de páginas privadas y recursos existentes. El navegador local revisa páginas y formularios con el HTML generado, tanto con JavaScript como sin él. La inspección de los servidores públicos está limitada si el entorno bloquea las conexiones; Search Console es la fuente para verificar el rastreo real.
+
+## Portafolio conceptual
+
+La colección `/portafolio` y sus cuatro casos tienen HTML completo, títulos, descripciones, breadcrumbs, imágenes sociales y canonical propios. El índice declara ItemList; cada caso declara CreativeWork con estado Conceptual y una descripción de marca ficticia. No se declaran clientes, resultados comerciales, premios o reseñas inventados. Las cinco rutas entran en el sitemap y en el renderizado público de Vercel.

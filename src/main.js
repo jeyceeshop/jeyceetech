@@ -1,3 +1,5 @@
+import './portfolio.css';
+import {initPortfolio} from './portfolio.js';
 import './admin-tools.css';
 import {initializeContent} from './content.js';
 import {initBrief} from './brief.js';
@@ -36,6 +38,7 @@ applySeo(path);
 const footerDirectory=document.querySelector('.footer-directory');if(footerDirectory)footerDirectory.outerHTML=footerDirectoryHtml();else document.querySelector('footer').insertAdjacentHTML('afterbegin',footerDirectoryHtml());
 document.querySelectorAll('form:not(#request-form):not(#checkout-form):not([data-portal-form])').forEach(form=>installAntiSpam(form));
 initContact();
+initPortfolio();
 document.querySelector('#year').textContent=new Date().getFullYear();
 const menu=document.querySelector('.menu-toggle');menu.setAttribute('aria-controls','primary-navigation');
 function closeDropdown(){toggle.setAttribute('aria-expanded','false');dropdown.hidden=true;}

@@ -1,3 +1,4 @@
+import {projects} from '../src/portfolio.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {services} from '../src/catalog.js';
@@ -6,9 +7,9 @@ import {renderPage} from '../src/pages.js';
 import {renderHome} from '../src/home.js';
 import {seoFor,seoHead,structuredData,indexablePaths,staticPaths,breadcrumbsFor,site} from '../src/seo.js';
 test('every public page has unique local SEO with canonical query and fragment removal',()=>{
- assert.equal(indexablePaths.length,33);assert.equal(new Set(indexablePaths).size,33);const titles=new Set(),descriptions=new Set();
+ const publicCount=34+projects.length;assert.equal(indexablePaths.length,publicCount);assert.equal(new Set(indexablePaths).size,publicCount);const titles=new Set(),descriptions=new Set();
  for(const path of indexablePaths){const meta=seoFor(path+'?utm_source=test#private');assert.equal(meta.found,true);assert.equal(meta.noindex,undefined);assert.equal(meta.url,site.origin+(path==='/'?'/':path));titles.add(meta.title);descriptions.add(meta.description);assert.ok(seoHead(path).includes('og:locale'));}
- assert.equal(titles.size,33);assert.equal(descriptions.size,33);assert.ok(renderHome().includes('Agencia digital<br/>en Panamá.'));
+ assert.equal(titles.size,publicCount);assert.equal(descriptions.size,publicCount);assert.ok(renderHome().includes('Agencia digital<br/>en Panamá.'));
 });
 test('all 21 services have visible matching local questions, Service schema and linked breadcrumbs',()=>{
  for(const service of services){const path='/servicios/'+service.slug,meta=seoFor(path),html=renderPage(path).html,graph=structuredData(path)['@graph'];assert.ok(meta.description.includes('Panamá'),path);assert.ok(html.includes(service.name+' en Panamá'));const faq=graph.find(n=>n['@type']==='FAQPage');assert.equal(faq.mainEntity.length,3);for(const item of faq.mainEntity){assert.ok(html.includes(item.name));assert.ok(html.includes(item.acceptedAnswer.text));}assert.ok(graph.some(n=>n['@type']==='Service'));assert.deepEqual(breadcrumbsFor(path).map(c=>c.path),['/','/servicios',path]);}

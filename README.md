@@ -18,7 +18,7 @@ npm run build
 npm run preview -- --port 4173
 ```
 
-El build compila los recursos, genera 43 documentos HTML completos y audita sus metadatos, sitemap, enlaces y recursos. Publicar `dist/` en Vercel con URLs limpias; las rutas desconocidas deben devolver el 404 real. El servidor de desarrollo y Vite preview no sustituyen las funciones de Vercel. La navegación, menú móvil, 21 páginas de servicios y descarga de brief funcionan sin servicios externos. Contáctanos envía directamente mediante la función SMTP de Vercel, sujeta a configurar las credenciales. El brief del checkout abre una solicitud por WhatsApp con mensaje preparado.
+El build compila los recursos, genera 48 documentos HTML completos y audita sus metadatos, sitemap, enlaces y recursos. Publicar `dist/` en Vercel con URLs limpias; las rutas desconocidas deben devolver el 404 real. El servidor de desarrollo y Vite preview no sustituyen las funciones de Vercel. La navegación, menú móvil, 21 páginas de servicios y descarga de brief funcionan sin servicios externos. Contáctanos envía directamente mediante la función SMTP de Vercel, sujeta a configurar las credenciales. El brief del checkout abre una solicitud por WhatsApp con mensaje preparado.
 
 El símbolo SVG es una recreación vectorial de la referencia aportada; reemplazar `public/mark.svg` por el archivo oficial cuando esté disponible. Imagen de portada original generada para este diseño. No se incluyen reseñas, cifras ni clientes inventados. DM Sans y Manrope se sirven localmente con sus licencias OFL y fuentes de respaldo del dispositivo. La portada usa WebP optimizado y las vistas previas sociales un JPEG de 1200 × 675.
 
@@ -231,7 +231,7 @@ El estado puede verse con el número y antispam. Para acceder a la conversación
 
 Implementación y pasos de Search Console: [docs/seo-panama.md](docs/seo-panama.md).
 
-- 33 URLs públicas con HTML, título y descripción propios: portada, 21 servicios, catálogo, planes, historia, contacto, FAQ, empleo y cinco rutas de recursos (índice + cuatro guías).
+- 38 URLs públicas con HTML, título y descripción propios: portada, 21 servicios, catálogo, planes, historia, contacto, FAQ, empleo, cinco rutas de recursos (índice + cuatro guías) y cinco de portafolio (índice + cuatro conceptos).
 - Datos estructurados de organización, servicios, preguntas visibles, artículos y rutas de navegación, sin reseñas ni ubicaciones inventadas.
 - `/sitemap.xml`, `/robots.txt`, canonical, idioma es-PA y metadatos de vistas previas. Las páginas auxiliares y privadas quedan fuera del sitemap y con noindex.
 - Preguntas específicas de cada servicio en `src/service-seo.js`; guías en `src/resources.js`; metadatos compartidos en `src/seo.js`.
@@ -244,3 +244,7 @@ Instagram oficial: [@jeycee.shop](https://www.instagram.com/jeycee.shop/), indic
 ## Cotizaciones y contenido administrable
 
 El portal incorpora borradores, envío de propuestas HTML y aceptación o solicitud de ajustes del cliente en Seguimiento. El editor publica servicios, precios, planes, textos de inicio/empresa y vacantes. Ejecuta `database/admin-proposals-content.sql` para actualizar una base existente; no se necesitan variables nuevas. [Instrucciones de activación y uso](docs/cotizaciones-y-contenido.md). Las páginas públicas se renderizan en Vercel con contenido y SEO vigentes, conservando sitemap y errores 404 reales.
+
+## Portafolio creativo
+
+`/portafolio` presenta cuatro proyectos conceptuales con imágenes originales, objetivos, dirección visual, entregables propuestos y resultados del concepto. Cada marca es ficticia y se identifica como tal en tarjetas, páginas y datos estructurados. La homepage destaca dos conceptos y el menú/pie enlazan a la colección. Los filtros funcionan por especialidad; los casos y su contenido también se leen sin JavaScript. Los contactos conservan el concepto y servicio elegidos. No requiere SQL ni variables nuevas. [Contenido y recursos](docs/portafolio.md).

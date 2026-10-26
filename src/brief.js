@@ -2,6 +2,7 @@ import {orderReferencePattern} from './portal-data.js';
 import {trackingReceipt} from './tracking-receipt.js';
 import {installAntiSpam} from './antispam.js';
 import {products} from './premium.js';
+import {installServiceBrief} from './brief-fields.js';
 import {orderSummary} from './pages.js';
 import {briefMessage,whatsappUrl} from './whatsapp.js';
 import {saveOrderNumber,recentOrderNumber} from './order-drafts.js';
@@ -21,14 +22,15 @@ export function initBrief(){
  guard.renew().then(ok=>{if(!ok)status.textContent='El servicio de pedidos no está disponible en este momento. Puedes reintentar la validación.';});
  try{const number=recentOrderNumber(localStorage);if(number){const note=document.querySelector('#recent-order-number');note.textContent='Último pedido creado en este navegador: '+number+'. No confirma recepción ni pago por la agencia.';note.hidden=false;}}catch{}
  function getProduct(){return products.find(p=>p.key===select.value);}
- select.addEventListener('change',()=>{document.querySelector('#order-summary').innerHTML=orderSummary(getProduct());});
+ const serviceBrief=installServiceBrief(form,getProduct);
+ select.addEventListener('change',()=>{serviceBrief.update();document.querySelector('#order-summary').innerHTML=orderSummary(getProduct());});
  form.addEventListener('invalid',()=>{status.textContent='Completa los campos obligatorios y la pregunta antispam antes de solicitar tu pedido.';},true);
  form.addEventListener('input',()=>{status.textContent='';});
  form.addEventListener('submit',async event=>{event.preventDefault();if(busy)return;
-  let data;try{data=Object.fromEntries(new FormData(form));briefMessage(getProduct(),data,'por asignar');}catch(error){status.textContent=error.message;return;}
+  let data;try{data=Object.fromEntries(new FormData(form));for(const key of Object.keys(data))if(key.startsWith('details_'))delete data[key];Object.assign(data,serviceBrief.payload());briefMessage(getProduct(),data,'por asignar');}catch(error){status.textContent=error.message;return;}
   busy=true;submit.disabled=true;submit.textContent='Creando pedido…';status.textContent='Enviando tu pedido a Jey Cee…';
   try{
-   const fingerprint=JSON.stringify([data.name,data.email,data.company,data.countryCode,data.phone,data.product,data.brief]);if(lastSubmission&&lastSubmission!==fingerprint)submissionId=crypto.randomUUID();lastSubmission=fingerprint;
+   const fingerprint=JSON.stringify([data.name,data.email,data.company,data.countryCode,data.phone,data.product,data.brief,data.serviceDetails]);if(lastSubmission&&lastSubmission!==fingerprint)submissionId=crypto.randomUUID();lastSubmission=fingerprint;
    const response=await fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...data,submissionId,privacy:form.elements.privacy.checked,antispam:guard.payload()})});
    let order;try{order=await response.json();}catch{throw Error('No pudimos confirmar la creación del pedido. Tus datos siguen en el formulario.');}
    if(!response.ok||order.created!==true)throw Error(order.error||'No pudimos crear el pedido. Intenta más tarde.');

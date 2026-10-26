@@ -165,6 +165,16 @@ Se retiró la casilla de asesoría pagada y el crédito automático de este fluj
 
 Se retiró el sistema de cupones. El brief ya no solicita códigos ni registra emails para promociones. El servidor rechaza códigos enviados desde versiones antiguas del formulario. La promoción directa del 10% en Desarrollo web y Diseño gráfico hasta el 30 de noviembre de 2026 se mantiene, calculada desde el catálogo.
 
+## Brief adaptado al servicio
+
+El checkout muestra preguntas según la especialidad elegida, además de los datos de contacto y el objetivo general. Desarrollo y diseño web preguntan por páginas, funciones, contenidos y referencias; diseño gráfico, por piezas, formatos, material de marca y referencias; marketing, por audiencia, objetivos, canales y presencia actual. Las 21 especialidades tienen perfil, con variantes para tienda online, landing, app/UX, identidad, packaging, motion, SEO, análisis de datos, automatización y mantenimiento.
+
+Los campos esenciales se validan con opciones de orientación o «por definir» cuando corresponda. Se comprueban obligatorios, tipos, longitudes, opciones y URLs públicas HTTP(S) sin credenciales en navegador y servidor. Las selecciones múltiples conservan todas las opciones y se normalizan en un orden estable. No hay adjuntos ni se solicitan accesos privados.
+
+Al cambiar de plan del mismo servicio se conservan las respuestas. Al cambiar de especialidad se recuerda el borrador de cada una solo en memoria durante esa visita; el envío incluye únicamente las respuestas del servicio actual. No se guardan respuestas personales en localStorage ni sessionStorage. El nuevo formulario envía `briefVersion: 1` y `serviceDetails`; las solicitudes antiguas sin esos campos siguen aceptando su brief general.
+
+Los detalles se añaden al texto del brief guardado en `portal_entries.content`, al correo HTML/texto para business y al mensaje de WhatsApp, sin publicar el brief del pedido en el seguimiento por número. También forman parte de la huella de idempotencia: un reintento no debe sobrescribir otro contenido. No requiere SQL, variables nuevas ni cambios en Supabase. Esquemas y validación: `src/brief-schema.js`; formulario: `src/brief-fields.js`; estilos: `src/brief-fields.css`.
+
 ## Pantalla final del pedido
 
 En modo correo, después de validar y crear el pedido, todo el contenido del checkout (intro, aviso, formulario y resumen) se sustituye por tres elementos: **Pedido creado**, número y **Seguir pedido en WhatsApp**. El botón abre WhatsApp con el mensaje completo; no se abre una ventana automáticamente al crear. Para otro pedido se vuelve al catálogo y se elige de nuevo un servicio/plan.

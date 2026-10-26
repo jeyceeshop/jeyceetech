@@ -7,6 +7,7 @@ import {briefMessage,whatsappUrl} from '../src/whatsapp.js';
 import {mailboxes} from '../src/email-routing.js';
 import {buildContactEmail} from './contact-email.js';
 import {orderPhone} from '../src/phone.js';
+import {projectBriefContent} from '../src/brief-schema.js';
 import {portalEnabled,portalConfigured} from './portal-store.js';
 import {capturePortal} from './portal-intake.js';
 import {displayReference} from '../src/portal-data.js';
@@ -35,7 +36,7 @@ export function makeOrdersHandler({env=process.env,transportFactory=nodemailer.c
  const message=briefMessage(product,data,number);
  const fields={phone:orderPhone(data),name:data.name.trim(),email:(data.email||'').trim(),company:(data.company||'').trim(),service:product.name,projectRef:number,topic:{title:'Nuevo pedido',email:mailboxes.business},message};
  if(portal){try{
-  const saved=await capturePortal({env,req,fields,reference:number,kind:'order',submissionId:data.submissionId,proof,product,offer,content:data.brief.trim(),config,transportFactory,store:portalStore,notifier});
+  const saved=await capturePortal({env,req,fields,reference:number,kind:'order',submissionId:data.submissionId,proof,product,offer,content:projectBriefContent(product,data),config,transportFactory,store:portalStore,notifier});
   const e=saved.entry,publicNumber=displayReference(e.reference),orderMessage=briefMessage(product,data,publicNumber)+(saved.tracking?'\n\nSeguimiento: '+saved.tracking.url:'');
   return send(200,{created:true,portal:true,number:publicNumber,productKey:e.product_key,createdAt:e.created_at,price:e.price,coupon:e.coupon,whatsappUrl:whatsappUrl(orderMessage),tracking:saved.tracking});
  }catch(error){if(error.retryAfter)res.setHeader('Retry-After',String(error.retryAfter));return send(error.status||503,{error:error.status&&error.status!==503?error.message:'No pudimos guardar tu pedido. Tus datos siguen en el formulario; reintenta en un momento.'});}}

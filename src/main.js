@@ -1,4 +1,5 @@
 import {initBrief} from './brief.js';
+import './brief-fields.css';
 import './support.css';
 import './home-sections.css';
 import './about-founder.css';

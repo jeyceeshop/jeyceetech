@@ -2,7 +2,7 @@
 
 ## Alcance implementado
 
-Dominio canónico: **https://www.jeycee.shop**. Se conserva el nombre visible Jey Cee y las variantes de marca JeyCee Tech / JeyCee en los datos de la organización. Teléfono oficial: +507 6091-3544; ventas: business@jeycee.shop; soporte: support@jeycee.shop. No se inventa dirección física, presencia en Google Maps, clientes, premios, reseñas ni posiciones en buscadores.
+Dominio canónico: **https://www.jeycee.shop**. El nombre de marca es **Jey Cee**, tanto en el contenido visible como en los datos estructurados de la organización. Teléfono oficial: +507 6091-3544; ventas: business@jeycee.shop; soporte: support@jeycee.shop. No se inventa dirección física, presencia en Google Maps, clientes, premios, reseñas ni posiciones en buscadores.
 
 `npm run build` ejecuta Vite y `scripts/generate-site.mjs`. Publica 48 documentos HTML completos: 38 URLs indexables, nueve páginas auxiliares con noindex y el 404. Las páginas públicas se leen sin ejecutar JavaScript; sus interacciones siguen funcionando con el mismo código del sitio. El menú y el pie también aparecen en el HTML inicial. Sin JavaScript, se ocultan los formularios para evitar envíos nativos con datos personales en la URL, y se ofrece contacto directo.
 

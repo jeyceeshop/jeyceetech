@@ -1,6 +1,6 @@
 import {defaultContent,serviceIds,planIds} from './content-defaults.js';
 const invalid=message=>{const error=Error(message);error.status=400;throw error;};
-export function plainText(value,label,max=1000,{optional=false}={}){if(typeof value!=='string')invalid('Revisa '+label+'.');const clean=value.trim();if((!optional&&!clean)||clean.length>max||/[<>\u0000-\u0008\u000b\u000c\u000e-\u001f]/.test(clean))invalid('Revisa '+label+': usa texto sin HTML, de hasta '+max+' caracteres.');return clean;}
+export function plainText(value,label,max=1000,{optional=false}={}){if(typeof value!=='string')invalid('Revisa '+label+'.');const clean=value.trim().replace(/\bJey\s*Cee[ \t]+Tech\b/gi,'Jey Cee');if((!optional&&!clean)||clean.length>max||/[<>\u0000-\u0008\u000b\u000c\u000e-\u001f]/.test(clean))invalid('Revisa '+label+': usa texto sin HTML, de hasta '+max+' caracteres.');return clean;}
 const object=(value,label)=>{if(!value||typeof value!=='object'||Array.isArray(value))invalid('Revisa '+label+'.');return value;};
 export function textList(value,label,{max=12,length=250,min=1}={}){if(!Array.isArray(value)||value.length<min||value.length>max)invalid('Revisa '+label+': de '+min+' a '+max+' elementos.');return value.map(item=>plainText(item,label,length));}
 function only(value,keys,label){object(value,label);if(Object.keys(value).some(key=>!keys.includes(key)))invalid('Hay campos no admitidos en '+label+'.');}

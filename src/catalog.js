@@ -20,7 +20,7 @@ export const plans = [
 export const salesEmail=mailboxes.business;
 export function contactUrl(service='',tier='') {
  const subject=[tier.toLowerCase()==='vip'?'[VIP] Cotización Jey Cee':'[COTIZACIÓN] Jey Cee',service,tier].filter(Boolean).join(' — ');
- const body=`Hola, equipo JeyCee Tech.\n\nMe interesa ${service||'conocer sus servicios premium'}${tier?' en el plan '+tier:''}.\n\nMi empresa:\nObjetivo del proyecto:\nFecha deseada:\n\nQuisiera conocer el alcance, calendario e inversión personalizada.`;
+ const body=`Hola, equipo Jey Cee.\n\nMe interesa ${service||'conocer sus servicios premium'}${tier?' en el plan '+tier:''}.\n\nMi empresa:\nObjetivo del proyecto:\nFecha deseada:\n\nQuisiera conocer el alcance, calendario e inversión personalizada.`;
  return 'mailto:'+salesRecipient(tier)+'?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
 }
 

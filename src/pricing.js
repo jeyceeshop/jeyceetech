@@ -1,6 +1,6 @@
 import {applyPromotion} from './offers.js';
 import {agencyServices} from './agency-services.js';
-// Tarifas JeyCee Tech en USD; por proyecto salvo cadence: month en el servicio.
+// Tarifas Jey Cee en USD; por proyecto salvo cadence: month en el servicio.
 // null = cotización personalizada. Edita aquí para actualizar toda la web.
 export const pricing = {
  'diseno-grafico':        {basico:65,  pro:145, vip:285, business:null},

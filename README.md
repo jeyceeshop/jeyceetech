@@ -1,4 +1,4 @@
-# JeyCee Tech
+# Jey Cee
 
 Sitio en español para Jey Cee, agencia digital enfocada en Panamá. Vite genera HTML completo por página; las funciones de Vercel gestionan contacto, pedidos, tickets y administración.
 

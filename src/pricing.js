@@ -19,5 +19,5 @@ export function startingPrice(tier){const values=Object.keys(pricing).map(slug=>
 export function priceLabel(price,cadence){return price===null?'A cotización':money(price)+' USD'+(cadence==='month'?' / mes':'');}
 export function billingLabel(cadence){return cadence==='month'?'por mes':'por proyecto';}
 
-export function offerFor(slug,tier,now=new Date()){return applyPromotion(priceFor(slug,tier),slug,now);}
-export function offerText(slug,tier,now=new Date()){const offer=offerFor(slug,tier,now);return priceLabel(offer.price)+(offer.percent?' ('+offer.percent+'% de descuento)':'');}
+export function offerFor(slug,tier){return applyPromotion(priceFor(slug,tier));}
+export function offerText(slug,tier){const offer=offerFor(slug,tier);return priceLabel(offer.price)+(offer.percent?' ('+offer.percent+'% de descuento)':'');}

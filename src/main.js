@@ -22,9 +22,30 @@ import {promotionBanner} from './commercial.js';
 import {priceLabel} from './pricing.js';
 import {renderHome} from './home.js';
 import {renderPage,planCards,serviceCards,note,orderSummary,escape} from './pages.js';
+const promotionSessionKey='jeycee-launch-announcement-seen';
+let showPromotion=true;
+try {
+ showPromotion=!sessionStorage.getItem(promotionSessionKey);
+} catch {}
+if(showPromotion){
+ if(!document.querySelector('.promotion-strip'))document.querySelector('header').insertAdjacentHTML('beforebegin',promotionBanner());
+ const banner=document.querySelector('.promotion-strip');
+ banner.hidden=false;
+ document.body.classList.add('has-promotion');
+ try {
+  sessionStorage.setItem(promotionSessionKey,'1');
+ } catch {}
+ function hidePromotion(){
+  banner.hidden=true;
+  document.body.classList.remove('has-promotion');
+ }
+ banner.querySelector('button').addEventListener('click',()=>{
+  hidePromotion();
+  document.querySelector('header a')?.focus();
+ });
+ window.addEventListener('pagehide',hidePromotion,{once:true});
+}
 const contentSnapshot=await initializeContent(location.pathname);
-document.querySelector('.promotion-strip')?.remove();
-const banner=promotionBanner();document.body.classList.toggle('has-promotion',!!banner);if(banner){document.body.classList.add('has-promotion');document.querySelector('header').insertAdjacentHTML('beforebegin',banner);}
 let path=location.pathname.replace(/\/+$/,'')||'/';
 
 const arrow='<svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19 19 5M5 5h14v14"/></svg>';

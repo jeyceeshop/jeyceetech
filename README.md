@@ -72,7 +72,7 @@ El inicio muestra nueve servicios destacados con acceso al catálogo completo. E
 ## Promoción y asesoramiento
 
 - Desarrollo web y Diseño gráfico aparecen primero en los destacados, accesos rápidos del menú, catálogo y comparación de precios. El resto del catálogo se conserva.
-- Ambos servicios tienen un 10% de descuento sobre su importe hasta el 30 de noviembre de 2026 inclusive, hora de Panamá. El límite exclusivo es `2026-12-01T05:00:00Z`. `src/offers.js` centraliza vigencia, servicios y porcentaje. Las pantallas calculan la oferta al cargar; después del límite desaparecen las etiquetas y se muestran tarifas regulares. Business incluye la oferta en la propuesta, sin inventar un importe.
+- Todos los servicios tienen un 10% de descuento de lanzamiento, sin fecha de vencimiento. `src/offers.js` aplica el descuento a la tarifa regular. El anuncio aparece una vez por sesión de navegación y se puede cerrar. Business incluye la oferta en la propuesta y conserva la cotización a medida.
 - Precios originales y rebajados se muestran en tarjetas, planes, tabla y solicitud. El formateador conserva los centavos (ejemplo: diseño gráfico Básico USD 58.50, antes USD 65).
 - Todas las cotizaciones son gratuitas y no requieren contratar una asesoría.
 - Asesoramiento opcional: USD 20. Al adquirir un servicio, se acredita íntegramente el pago de la asesoría; no añade costo al servicio. El crédito se usa una vez por asesoría verificada; en servicios mensuales se acredita al primer periodo.
@@ -163,7 +163,7 @@ Se guardan como máximo 20 referencias en localStorage, con número, clave del s
 
 Se retiró la casilla de asesoría pagada y el crédito automático de este flujo. La política comercial de asesoría de $20 se mantiene en sus secciones, para confirmar directamente con la agencia.
 
-Se retiró el sistema de cupones. El brief ya no solicita códigos ni registra emails para promociones. El servidor rechaza códigos enviados desde versiones antiguas del formulario. La promoción directa del 10% en Desarrollo web y Diseño gráfico hasta el 30 de noviembre de 2026 se mantiene, calculada desde el catálogo.
+Se retiró el sistema de cupones. El brief ya no solicita códigos ni registra emails para promociones. El servidor rechaza códigos enviados desde versiones antiguas del formulario. El descuento de lanzamiento del 10% se calcula desde las tarifas regulares del catálogo.
 
 ## Brief adaptado al servicio
 

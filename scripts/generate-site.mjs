@@ -13,7 +13,6 @@ for(const path of [...staticPaths,'/404']){
  const banner=promotionBanner();
  let html=template.replace('<!--SEO_HEAD-->',seoHead(path)).replace('<!--APP_NAV-->',navigationHtml()).replace('<!--APP_MAIN-->',content).replace('<!--APP_FOOTER-->',footerDirectoryHtml()).replace('<!--APP_BANNER-->',banner);
  html=html.replace('<main id="main-content">',`<main id="main-content"${path==='/'?'':' class="inner-page section"'}>`);
- if(banner)html=html.replace('<body id="top">','<body id="top" class="has-promotion">');
  const file=join(destination,path==='/'?'index.html':path.slice(1)+'.html');await mkdir(dirname(file),{recursive:true});await writeFile(file,html);
 }
 const sitemap='<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'+indexablePaths.map(path=>'  <url><loc>'+site.origin+(path==='/'?'/':path)+'</loc></url>').join('\n')+'\n</urlset>\n';

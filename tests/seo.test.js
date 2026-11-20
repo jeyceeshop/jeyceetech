@@ -23,5 +23,5 @@ test('organization data is consistent without invented address, partners, rating
 });
 test('guides contain useful visible content and first-party pricing, with matching Article metadata',()=>{
  assert.equal(guides.length,4);for(const guide of guides){const path='/recursos/'+guide.slug,html=renderPage(path).html,graph=structuredData(path)['@graph'];assert.ok(html.includes(guide.title));assert.ok(graph.some(n=>n['@type']==='Article'&&n.headline===guide.title));assert.ok(guide.body().split(/\s+/).length>350);for(const service of guide.services)assert.ok(html.includes('/servicios/'+service));}
- const pricing=guides.find(g=>g.slug.startsWith('cuanto'));assert.ok(pricing.body().includes('no un promedio del mercado panameño'));assert.ok(pricing.body().includes('tarifas regulares'));
+ const pricing=guides.find(g=>g.slug.startsWith('cuanto'));assert.ok(pricing.body().includes('no un promedio del mercado panameño'));assert.ok(pricing.body().includes('10% de descuento de lanzamiento'));
 });

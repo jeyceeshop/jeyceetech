@@ -2,7 +2,7 @@ import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import {join,dirname} from 'node:path';
 import {renderHome} from '../src/home.js';
 import {renderPage} from '../src/pages.js';
-import {promotionBanner} from '../src/commercial.js';
+import {promotionDialog} from '../src/commercial.js';
 import {navigationHtml,footerDirectoryHtml} from '../src/site-layout.js';
 import {staticPaths,indexablePaths,seoHead,breadcrumbHtml,site} from '../src/seo.js';
 const destination='dist',template=await readFile(join(destination,'index.html'),'utf8');
@@ -10,8 +10,8 @@ await mkdir('server/generated',{recursive:true});await writeFile('server/generat
 for(const marker of ['SEO_HEAD','APP_NAV','APP_MAIN','APP_FOOTER','APP_BANNER'])if(!template.includes('<!--'+marker+'-->'))throw Error('Missing HTML marker: '+marker);
 for(const path of [...staticPaths,'/404']){
  const content=path==='/'?renderHome():breadcrumbHtml(path)+renderPage(path).html;
- const banner=promotionBanner();
- let html=template.replace('<!--SEO_HEAD-->',seoHead(path)).replace('<!--APP_NAV-->',navigationHtml()).replace('<!--APP_MAIN-->',content).replace('<!--APP_FOOTER-->',footerDirectoryHtml()).replace('<!--APP_BANNER-->',banner);
+ const promotion=promotionDialog();
+ let html=template.replace('<!--SEO_HEAD-->',seoHead(path)).replace('<!--APP_NAV-->',navigationHtml()).replace('<!--APP_MAIN-->',content).replace('<!--APP_FOOTER-->',footerDirectoryHtml()).replace('<!--APP_BANNER-->',promotion);
  html=html.replace('<main id="main-content">',`<main id="main-content"${path==='/'?'':' class="inner-page section"'}>`);
  const file=join(destination,path==='/'?'index.html':path.slice(1)+'.html');await mkdir(dirname(file),{recursive:true});await writeFile(file,html);
 }

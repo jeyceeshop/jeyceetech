@@ -72,7 +72,7 @@ El inicio muestra nueve servicios destacados con acceso al catálogo completo. E
 ## Promoción y asesoramiento
 
 - Desarrollo web y Diseño gráfico aparecen primero en los destacados, accesos rápidos del menú, catálogo y comparación de precios. El resto del catálogo se conserva.
-- Todos los servicios tienen un 10% de descuento de lanzamiento, sin fecha de vencimiento. `src/offers.js` aplica el descuento a la tarifa regular. El anuncio aparece una vez por sesión de navegación y se puede cerrar. Business incluye la oferta en la propuesta y conserva la cotización a medida.
+- Todos los servicios tienen un 10% de descuento de lanzamiento, sin fecha de vencimiento. `src/offers.js` aplica el descuento a la tarifa regular. El anuncio se abre como un cartel gráfico centrado una vez por sesión de navegación y se puede cerrar. Business incluye la oferta en la propuesta y conserva la cotización a medida.
 - Precios originales y rebajados se muestran en tarjetas, planes, tabla y solicitud. El formateador conserva los centavos (ejemplo: diseño gráfico Básico USD 58.50, antes USD 65).
 - Todas las cotizaciones son gratuitas y no requieren contratar una asesoría.
 - Asesoramiento opcional: USD 20. Al adquirir un servicio, se acredita íntegramente el pago de la asesoría; no añade costo al servicio. El crédito se usa una vez por asesoría verificada; en servicios mensuales se acredita al primer periodo.

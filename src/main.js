@@ -18,33 +18,11 @@ import {initContact} from './contact.js';
 import {services,contactUrl,serviceGroups} from './catalog.js';
 import {products} from './premium.js';
 import {advisoryBalance} from './offers.js';
-import {promotionBanner} from './commercial.js';
+import {initPromotion} from './commercial.js';
 import {priceLabel} from './pricing.js';
 import {renderHome} from './home.js';
 import {renderPage,planCards,serviceCards,note,orderSummary,escape} from './pages.js';
-const promotionSessionKey='jeycee-launch-announcement-seen';
-let showPromotion=true;
-try {
- showPromotion=!sessionStorage.getItem(promotionSessionKey);
-} catch {}
-if(showPromotion){
- if(!document.querySelector('.promotion-strip'))document.querySelector('header').insertAdjacentHTML('beforebegin',promotionBanner());
- const banner=document.querySelector('.promotion-strip');
- banner.hidden=false;
- document.body.classList.add('has-promotion');
- try {
-  sessionStorage.setItem(promotionSessionKey,'1');
- } catch {}
- function hidePromotion(){
-  banner.hidden=true;
-  document.body.classList.remove('has-promotion');
- }
- banner.querySelector('button').addEventListener('click',()=>{
-  hidePromotion();
-  document.querySelector('header a')?.focus();
- });
- window.addEventListener('pagehide',hidePromotion,{once:true});
-}
+initPromotion();
 const contentSnapshot=await initializeContent(location.pathname);
 let path=location.pathname.replace(/\/+$/,'')||'/';
 
@@ -75,11 +53,11 @@ window.matchMedia('(max-width: 1024px)').addEventListener('change',()=>closeMenu
 nav.querySelectorAll('a').forEach(a=>{if(a.pathname===path)a.setAttribute('aria-current','page');});
 export function download(text,name){const url=URL.createObjectURL(new Blob([text],{type:'text/plain;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
 function mailLink(subject,text,email){return 'mailto:'+email+'?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(text);}
-const dialog=document.querySelector('dialog');let summary='';function showSummary(text){summary=text;document.querySelector('#project-summary').textContent=text;dialog.showModal();}
-document.querySelector('.dialog-close').addEventListener('click',()=>dialog.close());dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)dialog.close();}});
+const dialog=document.getElementById('project-dialog');let summary='';function showSummary(text){summary=text;document.querySelector('#project-summary').textContent=text;dialog.showModal();}
+dialog.querySelector('.dialog-close').addEventListener('click',()=>dialog.close());dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)dialog.close();}});
 document.querySelector('#download-brief').addEventListener('click',()=>download(summary,'solicitud-jey-cee.txt'));
 document.querySelector('#download-brief').insertAdjacentHTML('afterend','<a class="button outline" id="send-summary">Abrir solicitud en mi correo ↗</a>');
-const originalShow=showSummary;function present(text,email=mailboxes.business){originalShow(text);document.querySelector('#send-summary').href=mailLink((email===mailboxes.orders?'[PEDIDOS]':'[COTIZACIÓN]')+' Solicitud — Jey Cee',text,email);document.querySelector('dialog > p').textContent='Descarga el resumen o abre un correo a '+email+'. Nada se envía automáticamente.';}
+const originalShow=showSummary;function present(text,email=mailboxes.business){originalShow(text);document.querySelector('#send-summary').href=mailLink((email===mailboxes.orders?'[PEDIDOS]':'[COTIZACIÓN]')+' Solicitud — Jey Cee',text,email);dialog.querySelector('p').textContent='Descarga el resumen o abre un correo a '+email+'. Nada se envía automáticamente.';}
 const contact=document.querySelector('#contact-form');contact?.addEventListener('submit',e=>{e.preventDefault();const d=new FormData(contact);present(`SOLICITUD PARA JEY CEE\nCotización gratis, sin obligación de compra.\nNo es factura ni comprobante de pago.\n\nNombre: ${d.get('name')}\nCorreo: ${d.get('email')}\nServicio: ${d.get('service')}\n\nProyecto:\n${d.get('message')}`);});
 if(contentSnapshot.unavailable&&document.querySelector('#checkout-form')){document.querySelector('#checkout-form').innerHTML='<p role="alert">No pudimos consultar los planes actualizados. Recarga la página o contáctanos por WhatsApp.</p>';}else initBrief();
 if(path==='/admin'||path==='/admin/demo')import('./admin.js').then(m=>m.initAdmin({demo:path==='/admin/demo'}));

@@ -1,12 +1,16 @@
 import {portfolioPreview} from './portfolio.js';
 import {managedContent} from './content-state.js';
 import {promotion} from './offers.js';
-import {contactUrl,services,serviceGroups} from './catalog.js';
+import {services,serviceGroups} from './catalog.js';
+import {quoteWhatsApp} from './whatsapp.js';
 import {renderHomeProcess,renderBrandReferences,renderTeamStory} from './home-sections.js';
 export function renderHome(){return `
 <section class="home-hero" id="inicio">
  <div class="home-hero-top"><span class="eyebrow"><i></i> AGENCIA DIGITAL EN PANAMÁ</span><span class="micro-copy">ESTRATEGIA / IDENTIDAD / EXPERIENCIA</span></div>
- <div class="home-hero-layout"><div class="home-hero-copy"><span class="hero-kicker">PARA MARCAS QUE QUIEREN IR MÁS ALLÁ</span><h1>${managedContent?.home.title||'Agencia digital'}<br/>${managedContent?.home.location||'en Panamá.'}<br/><em>${managedContent?.home.emphasis||'Ideas que crecen.'}</em></h1><p>${managedContent?.home.description||'Diseño gráfico, desarrollo web, branding y marketing digital para emprendedores y empresas en Panamá. Le damos dirección e identidad a la presencia digital de tu negocio.'}</p><div class="hero-actions"><a class="button light" href="/servicios">Encuentra tu servicio ↗</a><a class="hero-secondary" href="${contactUrl()}">Cotización gratis ↗</a></div><div class="hero-footnote"><span class="mini-mark">✦</span><span>Diseño con intención.<br/><b>Una colaboración de principio a fin.</b></span></div></div>
+ <div class="home-hero-layout"><div class="home-hero-copy"><span class="hero-kicker">PARA MARCAS QUE QUIEREN IR MÁS ALLÁ</span><h1>${managedContent?.home.title||'Agencia digital'}<br/>${managedContent?.home.location||'en Panamá.'}<br/><em>${managedContent?.home.emphasis||'Ideas que crecen.'}</em></h1><p>${managedContent?.home.description||'Diseño gráfico, desarrollo web, branding y marketing digital para emprendedores y empresas en Panamá. Le damos dirección e identidad a la presencia digital de tu negocio.'}</p><div class="hero-actions">
+  <a class="button light" href="${quoteWhatsApp()}" target="_blank" rel="noopener noreferrer">Cotizar gratis por WhatsApp <span aria-hidden="true">↗</span></a>
+  <a class="hero-secondary" href="/servicios">Ver servicios <span aria-hidden="true">↗</span></a>
+ </div><div class="hero-footnote"><span class="mini-mark">✦</span><span>Diseño con intención.<br/><b>Una colaboración de principio a fin.</b></span></div></div>
  <div class="hero-art home-visual">
   <img src="/jey-cee-marble.webp" srcset="/jey-cee-marble-640.webp 640w, /jey-cee-marble.webp 1254w" sizes="(max-width: 600px) 88vw, (max-width: 1600px) 40vw, 740px" width="1254" height="1254" fetchpriority="high" alt="Busto grecorromano de mármol iluminado en tonos cálidos"/>
  </div></div>
